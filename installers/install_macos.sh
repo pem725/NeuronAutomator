@@ -116,43 +116,183 @@ cat > "$LAUNCHD_DIR/com.neuron.automation.plist" << EOF
     </array>
     <key>StartCalendarInterval</key>
     <array>
+        <!-- Monday 5:30 AM -->
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
             <integer>5</integer>
             <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Monday 6:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>1</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
             <integer>0</integer>
         </dict>
+        <!-- Monday 6:30 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>1</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Monday 7:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>1</integer>
+            <key>Hour</key>
+            <integer>7</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- Tuesday 5:30 AM -->
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
             <integer>5</integer>
             <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Tuesday 6:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>2</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
             <integer>0</integer>
         </dict>
+        <!-- Tuesday 6:30 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>2</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Tuesday 7:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>2</integer>
+            <key>Hour</key>
+            <integer>7</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- Wednesday 5:30 AM -->
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
             <integer>5</integer>
             <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Wednesday 6:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>3</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
             <integer>0</integer>
         </dict>
+        <!-- Wednesday 6:30 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>3</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Wednesday 7:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>3</integer>
+            <key>Hour</key>
+            <integer>7</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- Thursday 5:30 AM -->
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
             <integer>5</integer>
             <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Thursday 6:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>4</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
             <integer>0</integer>
         </dict>
+        <!-- Thursday 6:30 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>4</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Thursday 7:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>4</integer>
+            <key>Hour</key>
+            <integer>7</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- Friday 5:30 AM -->
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
             <integer>5</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Friday 6:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>5</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- Friday 6:30 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>5</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+        <!-- Friday 7:00 AM -->
+        <dict>
+            <key>Weekday</key>
+            <integer>5</integer>
+            <key>Hour</key>
+            <integer>7</integer>
             <key>Minute</key>
             <integer>0</integer>
         </dict>
@@ -216,7 +356,7 @@ echo "   • Manual run: $SCRIPT_NAME"
 echo "   • Check schedule: launchctl list | grep neuron"
 echo "   • View logs: tail -f '$CONFIG_DIR/neuron_automation.log'"
 echo ""
-echo "⏰ The automation will run automatically every weekday at 5:00 AM"
+echo "⏰ The automation will run automatically at 5:30, 6:00, 6:30, 7:00 AM on weekdays"
 echo ""
 echo "🗑️ To uninstall: $CONFIG_DIR/uninstall.sh"
 echo ""

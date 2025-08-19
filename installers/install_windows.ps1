@@ -125,12 +125,54 @@ $taskXml = @"
     <Description>Automatically opens Neuron Daily newsletter with article links every weekday morning</Description>
   </RegistrationInfo>
   <Triggers>
+    <!-- 5:30 AM Trigger -->
     <CalendarTrigger>
-      <Repetition>
-        <Interval>P1D</Interval>
-        <StopAtDurationEnd>false</StopAtDurationEnd>
-      </Repetition>
-      <StartBoundary>$(Get-Date -Date "05:00" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
+      <StartBoundary>$(Get-Date -Date "05:30" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <DaysOfWeek>
+          <Monday />
+          <Tuesday />
+          <Wednesday />
+          <Thursday />
+          <Friday />
+        </DaysOfWeek>
+        <WeeksInterval>1</WeeksInterval>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+    <!-- 6:00 AM Trigger -->
+    <CalendarTrigger>
+      <StartBoundary>$(Get-Date -Date "06:00" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <DaysOfWeek>
+          <Monday />
+          <Tuesday />
+          <Wednesday />
+          <Thursday />
+          <Friday />
+        </DaysOfWeek>
+        <WeeksInterval>1</WeeksInterval>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+    <!-- 6:30 AM Trigger -->
+    <CalendarTrigger>
+      <StartBoundary>$(Get-Date -Date "06:30" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <DaysOfWeek>
+          <Monday />
+          <Tuesday />
+          <Wednesday />
+          <Thursday />
+          <Friday />
+        </DaysOfWeek>
+        <WeeksInterval>1</WeeksInterval>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+    <!-- 7:00 AM Trigger -->
+    <CalendarTrigger>
+      <StartBoundary>$(Get-Date -Date "07:00" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
       <Enabled>true</Enabled>
       <ScheduleByWeek>
         <DaysOfWeek>
@@ -238,7 +280,7 @@ Write-Host "   • Manual run: $SCRIPT_NAME" -ForegroundColor White
 Write-Host "   • Check task: schtasks /query /tn $TASK_NAME" -ForegroundColor White
 Write-Host "   • View logs: type `"$CONFIG_DIR\neuron_automation.log`"" -ForegroundColor White
 Write-Host ""
-Write-Host "⏰ The automation will run automatically every weekday at 5:00 AM" -ForegroundColor Yellow
+Write-Host "⏰ The automation will run automatically at 5:30, 6:00, 6:30, 7:00 AM on weekdays" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "🗑️ To uninstall: PowerShell -File `"$CONFIG_DIR\uninstall.ps1`"" -ForegroundColor Red
 Write-Host ""

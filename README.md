@@ -6,7 +6,8 @@
 
 ## Features
 
-- ✅ **Weekday Automation**: Runs only on Monday-Friday
+- ✅ **Smart Multi-Run System**: Multiple scheduled runs with intelligent change detection
+- ✅ **Optimal Newsletter Coverage**: Catches newsletters regardless of publication time (5:00-7:00 AM)
 - ✅ **Intelligent Link Extraction**: Finds and filters relevant article links
 - ✅ **Error Recovery**: Robust retry mechanisms and comprehensive error handling
 - ✅ **Cross-Platform**: Works on Linux, macOS, and Windows
@@ -59,7 +60,7 @@ The installer will:
 - Install system dependencies (Python, Chrome, package managers)
 - Create a virtual environment with required packages
 - Set up automatic scheduling (systemd/launchd/Task Scheduler)
-- Configure the system to run every weekday at 5:00 AM
+- Configure the system to run multiple times each weekday morning (5:30, 6:00, 6:30, 7:00 AM)
 
 ### 3. Test the Installation
 
@@ -74,7 +75,7 @@ This should open Chrome with the Neuron Daily newsletter and article tabs.
 ## Usage
 
 ### Automatic Operation
-The script runs automatically every weekday at 5:00 AM (with up to 5 minutes random delay).
+The script runs automatically at 5:30, 6:00, 6:30, and 7:00 AM on weekdays, with smart detection to prevent redundant executions.
 
 ### Manual Operation
 Run manually anytime:
@@ -91,6 +92,30 @@ Check for updates:
 ```bash
 neuron-automation --check-updates
 ```
+
+## How It Works: Smart Multi-Run System
+
+The automation uses a sophisticated **Phase 2** approach that combines multiple scheduled runs with intelligent content detection:
+
+### **📅 Daily Schedule**
+- **5:30 AM**: Early check (catches early publications)
+- **6:00 AM**: Primary window (most common publication time)  
+- **6:30 AM**: Late catch (for delayed publications)
+- **7:00 AM**: Final safety net (covers very late publications)
+
+### **🧠 Smart Detection Logic**
+
+**Scenario 1: Normal Publication (6:15 AM)**
+- 5:30 AM → Finds old content → Proceeds (user gets yesterday's articles temporarily)
+- 6:00 AM → Same old content → **SKIPS** (smart detection prevents redundancy)
+- 6:30 AM → **NEW content detected!** → Proceeds (user gets today's articles)
+- 7:00 AM → Same new content → **SKIPS** (already got today's content)
+
+**Scenario 2: Late Publication (6:45 AM)**
+- 5:30 AM, 6:00 AM, 6:30 AM → All skip old content after first run
+- 7:00 AM → **NEW content detected!** → Proceeds (catches late publication)
+
+**Result: Perfect coverage with zero redundancy** ✨
 
 ### System Management
 
@@ -151,14 +176,14 @@ sudo systemctl edit neuron-automation.timer
 Add your custom schedule:
 ```ini
 [Timer]
-# Run at 7:30 AM instead of 5:00 AM
+# Add an additional run at 7:30 AM
 OnCalendar=Mon,Tue,Wed,Thu,Fri *-*-* 07:30:00
 ```
 
 Common schedule formats:
 - `*-*-* 09:00:00` - Daily at 9:00 AM
-- `Mon *-*-* 05:00:00` - Mondays only at 5:00 AM  
-- `*-*-01 05:00:00` - First day of every month
+- `Mon *-*-* 05:30:00` - Mondays only at 5:30 AM  
+- `*-*-01 05:30:00` - First day of every month
 
 ## Troubleshooting
 
