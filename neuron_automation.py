@@ -14,6 +14,7 @@ License: MIT
 import os
 import sys
 import time
+import hashlib
 import logging
 import requests
 import subprocess
@@ -32,6 +33,17 @@ from selenium.common.exceptions import (
     ElementNotInteractableException
 )
 from webdriver_manager.chrome import ChromeDriverManager
+
+# Import configuration
+try:
+    from config import ACTIVE_CONFIG
+except ImportError:
+    # Fallback if config not found
+    class DefaultConfig:
+        ENABLE_CHANGE_DETECTION = True
+        CONTENT_CHECK_TIMEOUT = 10
+        CACHE_CLEANUP_DAYS = 7
+    ACTIVE_CONFIG = DefaultConfig()
 
 
 class NeuronNewsletterAutomation:
@@ -260,6 +272,111 @@ class NeuronNewsletterAutomation:
                     pass
             return False
     
+    def get_content_hash(self) -> Optional[str]:
+        """Get hash of key newsletter content areas for change detection."""
+        try:
+            timeout = getattr(ACTIVE_CONFIG, 'CONTENT_CHECK_TIMEOUT', 10)
+            response = requests.get(self.base_url, timeout=timeout, headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; NeuronAutomation/1.0)'
+            })
+            response.raise_for_status()
+            
+            # Import BeautifulSoup for content parsing
+            try:
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(response.text, 'html.parser')
+                
+                # Focus on content areas likely to change with new newsletters
+                content_selectors = [
+                    'main', '.newsletter', '.content', 'article', 
+                    '.post', '.entry', '.news-content', '[role="main"]'
+                ]
+                
+                content_areas = []
+                for selector in content_selectors:
+                    elements = soup.select(selector)
+                    content_areas.extend(elements)
+                
+                # If no specific content areas found, use body
+                if not content_areas:
+                    content_areas = soup.select('body')
+                
+                # Extract text content and create hash
+                content_text = ' '.join([
+                    area.get_text(strip=True) 
+                    for area in content_areas
+                ])
+                
+                # Create hash of content
+                content_hash = hashlib.md5(content_text.encode('utf-8')).hexdigest()
+                self.logger.debug(f"Content hash generated: {content_hash[:12]}...")
+                return content_hash
+                
+            except ImportError:
+                # Fallback: use raw HTML if BeautifulSoup not available
+                content_hash = hashlib.md5(response.text.encode('utf-8')).hexdigest()
+                self.logger.debug(f"Raw HTML hash generated: {content_hash[:12]}...")
+                return content_hash
+                
+        except Exception as e:
+            self.logger.warning(f"Failed to get content hash: {e}")
+            return None
+    
+    def should_run_automation(self) -> bool:
+        """Check if newsletter content has changed since last run today."""
+        # Check if change detection is enabled
+        if not getattr(ACTIVE_CONFIG, 'ENABLE_CHANGE_DETECTION', True):
+            self.logger.debug("Change detection disabled - proceeding with automation")
+            return True
+        
+        today = datetime.now().strftime("%Y-%m-%d")
+        cache_file = self.config_path / f"last_run_{today}.txt"
+        
+        # Get current content hash
+        current_hash = self.get_content_hash()
+        if current_hash is None:
+            self.logger.warning("Could not get content hash, proceeding with automation")
+            return True
+        
+        # Check if we've run today and if content has changed
+        if cache_file.exists():
+            try:
+                last_hash = cache_file.read_text(encoding='utf-8').strip()
+                if current_hash == last_hash:
+                    self.logger.info("No content changes detected since last run today")
+                    return False
+                else:
+                    self.logger.info("Content changes detected since last run!")
+                    # Update cache with new hash
+                    cache_file.write_text(current_hash, encoding='utf-8')
+                    return True
+            except Exception as e:
+                self.logger.warning(f"Error reading cache file: {e}")
+                
+        # First run of the day - save hash and proceed
+        try:
+            cache_file.write_text(current_hash, encoding='utf-8')
+            self.logger.info("First run of the day - proceeding with automation")
+        except Exception as e:
+            self.logger.warning(f"Could not save content hash: {e}")
+            
+        return True
+    
+    def cleanup_old_cache_files(self) -> None:
+        """Clean up old cache files to prevent directory bloat."""
+        try:
+            cleanup_days = getattr(ACTIVE_CONFIG, 'CACHE_CLEANUP_DAYS', 7)
+            cutoff_time = datetime.now().timestamp() - (cleanup_days * 24 * 60 * 60)
+            
+            # Find old cache files
+            for cache_file in self.config_path.glob("last_run_*.txt"):
+                if cache_file.stat().st_mtime < cutoff_time:
+                    cache_file.unlink()
+                    self.logger.debug(f"Removed old cache file: {cache_file.name}")
+                    
+        except Exception as e:
+            self.logger.warning(f"Error cleaning up cache files: {e}")
+    
     def run_automation(self) -> bool:
         """Run the complete automation workflow."""
         self.logger.info("Starting Neuron Newsletter automation")
@@ -273,6 +390,13 @@ class NeuronNewsletterAutomation:
         if not self.check_internet_connectivity():
             self.logger.error("No internet connection - cannot proceed")
             return False
+        
+        # Check if automation should run (content change detection)
+        if not self.should_run_automation():
+            self.logger.info("Skipping automation - no content changes detected")
+            # Clean up old cache files before exiting
+            self.cleanup_old_cache_files()
+            return True
         
         # Retry mechanism for the main workflow
         for attempt in range(1, self.max_retries + 1):

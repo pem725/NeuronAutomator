@@ -114,6 +114,11 @@ class Config:
     CONNECTIVITY_CHECK_URL = "https://www.google.com"
     CONNECTIVITY_TIMEOUT = 10       # Timeout for connectivity check (seconds)
     
+    # Change detection settings
+    ENABLE_CHANGE_DETECTION = True  # Enable smart content change detection
+    CONTENT_CHECK_TIMEOUT = 10      # Timeout for content hash requests (seconds)
+    CACHE_CLEANUP_DAYS = 7          # Days to keep old cache files
+    
     # Advanced settings
     ENABLE_JAVASCRIPT_WAIT = True   # Wait for JavaScript to finish loading
     JAVASCRIPT_WAIT_TIME = 2        # Additional wait time for JS (seconds)
