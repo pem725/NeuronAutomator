@@ -59,7 +59,7 @@ The installer will:
 - Install system dependencies (Python, Chrome, package managers)
 - Create a virtual environment with required packages
 - Set up automatic scheduling (systemd/launchd/Task Scheduler)
-- Configure the system to run every weekday at 8:00 AM
+- Configure the system to run every weekday at 6:00 AM
 
 ### 3. Test the Installation
 
@@ -74,7 +74,7 @@ This should open Chrome with the Neuron Daily newsletter and article tabs.
 ## Usage
 
 ### Automatic Operation
-The script runs automatically every weekday at 8:00 AM (with up to 5 minutes random delay).
+The script runs automatically every weekday at 6:00 AM (with up to 5 minutes random delay).
 
 ### Manual Operation
 Run manually anytime:
@@ -141,14 +141,14 @@ sudo systemctl edit neuron-automation.timer
 Add your custom schedule:
 ```ini
 [Timer]
-# Run at 7:30 AM instead of 8:00 AM
+# Run at 7:30 AM instead of 6:00 AM
 OnCalendar=Mon,Tue,Wed,Thu,Fri *-*-* 07:30:00
 ```
 
 Common schedule formats:
 - `*-*-* 09:00:00` - Daily at 9:00 AM
-- `Mon *-*-* 08:00:00` - Mondays only at 8:00 AM  
-- `*-*-01 08:00:00` - First day of every month
+- `Mon *-*-* 06:00:00` - Mondays only at 6:00 AM  
+- `*-*-01 06:00:00` - First day of every month
 
 ## Troubleshooting
 

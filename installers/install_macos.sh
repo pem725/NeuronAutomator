@@ -120,7 +120,7 @@ cat > "$LAUNCHD_DIR/com.neuron.automation.plist" << EOF
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>8</integer>
+            <integer>6</integer>
             <key>Minute</key>
             <integer>0</integer>
         </dict>
@@ -128,7 +128,7 @@ cat > "$LAUNCHD_DIR/com.neuron.automation.plist" << EOF
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>8</integer>
+            <integer>6</integer>
             <key>Minute</key>
             <integer>0</integer>
         </dict>
@@ -136,7 +136,7 @@ cat > "$LAUNCHD_DIR/com.neuron.automation.plist" << EOF
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>8</integer>
+            <integer>6</integer>
             <key>Minute</key>
             <integer>0</integer>
         </dict>
@@ -144,7 +144,7 @@ cat > "$LAUNCHD_DIR/com.neuron.automation.plist" << EOF
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>8</integer>
+            <integer>6</integer>
             <key>Minute</key>
             <integer>0</integer>
         </dict>
@@ -152,7 +152,7 @@ cat > "$LAUNCHD_DIR/com.neuron.automation.plist" << EOF
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>8</integer>
+            <integer>6</integer>
             <key>Minute</key>
             <integer>0</integer>
         </dict>
@@ -216,7 +216,7 @@ echo "   • Manual run: $SCRIPT_NAME"
 echo "   • Check schedule: launchctl list | grep neuron"
 echo "   • View logs: tail -f '$CONFIG_DIR/neuron_automation.log'"
 echo ""
-echo "⏰ The automation will run automatically every weekday at 8:00 AM"
+echo "⏰ The automation will run automatically every weekday at 6:00 AM"
 echo ""
 echo "🗑️ To uninstall: $CONFIG_DIR/uninstall.sh"
 echo ""

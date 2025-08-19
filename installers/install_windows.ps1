@@ -130,7 +130,7 @@ $taskXml = @"
         <Interval>P1D</Interval>
         <StopAtDurationEnd>false</StopAtDurationEnd>
       </Repetition>
-      <StartBoundary>$(Get-Date -Date "08:00" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
+      <StartBoundary>$(Get-Date -Date "06:00" -Format "yyyy-MM-ddTHH:mm:ss")</StartBoundary>
       <Enabled>true</Enabled>
       <ScheduleByWeek>
         <DaysOfWeek>
@@ -238,7 +238,7 @@ Write-Host "   • Manual run: $SCRIPT_NAME" -ForegroundColor White
 Write-Host "   • Check task: schtasks /query /tn $TASK_NAME" -ForegroundColor White
 Write-Host "   • View logs: type `"$CONFIG_DIR\neuron_automation.log`"" -ForegroundColor White
 Write-Host ""
-Write-Host "⏰ The automation will run automatically every weekday at 8:00 AM" -ForegroundColor Yellow
+Write-Host "⏰ The automation will run automatically every weekday at 6:00 AM" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "🗑️ To uninstall: PowerShell -File `"$CONFIG_DIR\uninstall.ps1`"" -ForegroundColor Red
 Write-Host ""
