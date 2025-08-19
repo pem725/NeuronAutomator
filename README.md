@@ -121,20 +121,27 @@ The automation uses a sophisticated **Phase 2** approach that combines multiple 
 
 **Result: Perfect coverage with zero redundancy** ✨
 
-### **🌐 Chrome Browser Integration**
+### **🌐 Chrome Browser Integration & Persistence**
 
-The automation now uses your **regular Chrome browser** instead of creating isolated instances:
+The automation integrates seamlessly with your Chrome browser and **keeps tabs open after script completion**:
 
-**✅ Benefits:**
-- **Persistent Tabs**: Newsletter tabs remain open until you manually close them
-- **No Interruption**: If you get up late, your tabs from 5:30 AM are still there
-- **Regular Profile**: Uses your bookmarks, extensions, and settings
-- **Existing Windows**: Adds tabs to current Chrome windows when possible
+**✅ Browser Persistence Features:**
+- **Tabs Stay Open**: Browser detaches after automation, keeping all newsletter tabs accessible
+- **No Premature Closing**: Script ending does NOT close your reading tabs
+- **Morning Workflow**: Perfect for getting up to pre-opened articles ready to read
+- **Manual Control**: Only you decide when to close the tabs
+
+**✅ Integration Benefits:**
+- **Regular Profile**: Uses your bookmarks, extensions, and settings  
+- **Existing Windows**: Connects to running Chrome when possible
+- **Smart Detection**: Prevents opening duplicate content on multiple runs
+- **Error Handling**: Only successful runs leave browser open (failures close automatically)
 
 **📖 Reading Scenarios:**
-- **Early Bird (6:00 AM)**: Get fresh tabs, read immediately
-- **Late Riser (8:00 AM)**: Earlier tabs still open and waiting
-- **Multiple Runs**: Later runs add to existing tabs (smart detection prevents duplicates)
+- **Early Bird (6:00 AM)**: Automation runs, tabs open → read immediately
+- **Late Riser (8:00 AM)**: Earlier tabs still open and waiting for you
+- **Multiple Runs**: Smart detection prevents duplicates, adds only new content
+- **Browser Persistence**: Tabs remain accessible until you manually close them
 
 ### System Management
 
@@ -339,9 +346,11 @@ CONTENT_SELECTORS = [
 
 - The script opens tabs in your regular Chrome browser, using your existing profile and settings
 - When possible, it connects to existing Chrome instances rather than creating new ones
+- **Browser Persistence**: Successful automation runs leave tabs open indefinitely for reading
+- **Automatic Cleanup**: Failed automation attempts close browser windows to prevent resource waste
 - Logs may contain URLs visited - review log files if sharing system access  
 - The script only accesses the specified newsletter URL and extracted links
-- Browser tabs remain open until you manually close them, allowing you to read at your own pace
+- **Privacy Note**: Newsletter tabs remain accessible in your browser until manually closed
 
 ## Performance
 
