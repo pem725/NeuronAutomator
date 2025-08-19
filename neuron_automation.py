@@ -1,0 +1,345 @@
+#!/usr/bin/env python3
+"""
+Neuron Daily Newsletter Automation Script
+=========================================
+
+Automatically opens the latest Neuron Daily newsletter with all article links
+in separate tabs every weekday morning.
+
+Author: AI Assistant
+Created: 2025
+License: MIT
+"""
+
+import os
+import sys
+import time
+import logging
+import requests
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import List, Optional, Tuple
+from urllib.parse import urljoin, urlparse
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import (
+    WebDriverException, TimeoutException, NoSuchElementException,
+    ElementNotInteractableException
+)
+from webdriver_manager.chrome import ChromeDriverManager
+
+
+class NeuronNewsletterAutomation:
+    """Main class for automating Neuron Daily newsletter opening."""
+    
+    def __init__(self, config_path: Optional[Path] = None):
+        """Initialize the automation system."""
+        self.config_path = config_path or Path.home() / '.config' / 'neuron-automation'
+        self.config_path.mkdir(parents=True, exist_ok=True)
+        
+        self.log_file = self.config_path / 'neuron_automation.log'
+        self.setup_logging()
+        
+        # Configuration
+        self.base_url = "https://www.theneurondaily.com/"
+        self.max_retries = 3
+        self.retry_delay = 5
+        self.page_load_timeout = 30
+        self.element_wait_timeout = 15
+        
+        self.logger.info("NeuronNewsletterAutomation initialized")
+    
+    def setup_logging(self) -> None:
+        """Setup logging configuration."""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(self.log_file),
+                logging.StreamHandler(sys.stdout)
+            ]
+        )
+        self.logger = logging.getLogger(__name__)
+    
+    def is_weekday(self) -> bool:
+        """Check if today is a weekday (Monday-Friday)."""
+        today = datetime.now().weekday()
+        is_weekday = today < 5  # 0-4 are Monday-Friday
+        self.logger.info(f"Today is {'a weekday' if is_weekday else 'weekend'}")
+        return is_weekday
+    
+    def check_internet_connectivity(self) -> bool:
+        """Check if internet connection is available."""
+        try:
+            response = requests.get("https://www.google.com", timeout=10)
+            connected = response.status_code == 200
+            self.logger.info(f"Internet connectivity: {'Available' if connected else 'Not available'}")
+            return connected
+        except requests.RequestException as e:
+            self.logger.error(f"Internet connectivity check failed: {e}")
+            return False
+    
+    def setup_chrome_driver(self) -> webdriver.Chrome:
+        """Setup and return Chrome WebDriver with appropriate options."""
+        self.logger.info("Setting up Chrome WebDriver")
+        
+        chrome_options = Options()
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--start-maximized")
+        
+        # Add user data directory for persistence
+        user_data_dir = self.config_path / 'chrome_profile'
+        user_data_dir.mkdir(exist_ok=True)
+        chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+        
+        try:
+            # Use webdriver-manager to automatically handle ChromeDriver
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver.set_page_load_timeout(self.page_load_timeout)
+            self.logger.info("Chrome WebDriver setup successful")
+            return driver
+        except Exception as e:
+            self.logger.error(f"Failed to setup Chrome WebDriver: {e}")
+            raise
+    
+    def wait_for_page_load(self, driver: webdriver.Chrome, timeout: int = None) -> bool:
+        """Wait for page to fully load."""
+        timeout = timeout or self.element_wait_timeout
+        try:
+            WebDriverWait(driver, timeout).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+            # Additional wait for dynamic content
+            time.sleep(2)
+            return True
+        except TimeoutException:
+            self.logger.warning("Page load timeout reached")
+            return False
+    
+    def extract_newsletter_links(self, driver: webdriver.Chrome) -> List[str]:
+        """Extract all relevant links from the newsletter page."""
+        self.logger.info("Extracting newsletter links")
+        links = []
+        
+        try:
+            # Wait for the page content to load
+            WebDriverWait(driver, self.element_wait_timeout).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            
+            # Find all links on the page
+            link_elements = driver.find_elements(By.TAG_NAME, "a")
+            self.logger.info(f"Found {len(link_elements)} total links on page")
+            
+            # Filter for relevant article links
+            for link_elem in link_elements:
+                try:
+                    href = link_elem.get_attribute("href")
+                    text = link_elem.text.strip()
+                    
+                    if not href or not text:
+                        continue
+                    
+                    # Skip internal navigation and non-article links
+                    if self.is_relevant_article_link(href, text):
+                        absolute_url = urljoin(self.base_url, href)
+                        if absolute_url not in links:
+                            links.append(absolute_url)
+                            self.logger.debug(f"Added link: {text[:50]}... -> {absolute_url}")
+                
+                except Exception as e:
+                    self.logger.debug(f"Error processing link element: {e}")
+                    continue
+            
+            self.logger.info(f"Extracted {len(links)} relevant article links")
+            return links
+            
+        except TimeoutException:
+            self.logger.error("Timeout waiting for page content")
+            return []
+        except Exception as e:
+            self.logger.error(f"Error extracting links: {e}")
+            return []
+    
+    def is_relevant_article_link(self, href: str, text: str) -> bool:
+        """Determine if a link is a relevant article link."""
+        if not href or not text:
+            return False
+        
+        # Skip obvious non-article links
+        skip_patterns = [
+            '#', 'javascript:', 'mailto:', 'tel:',
+            'facebook.com', 'twitter.com', 'linkedin.com', 'instagram.com',
+            'youtube.com', 'tiktok.com', 'discord.com',
+            'subscribe', 'unsubscribe', 'privacy', 'terms',
+            'contact', 'about', 'home', 'archive'
+        ]
+        
+        href_lower = href.lower()
+        text_lower = text.lower()
+        
+        for pattern in skip_patterns:
+            if pattern in href_lower or pattern in text_lower:
+                return False
+        
+        # Must have meaningful text (not just symbols or very short)
+        if len(text.strip()) < 5:
+            return False
+        
+        # Skip common navigation text
+        nav_text = ['read more', 'click here', 'learn more', 'view all', 'see more']
+        if any(nav in text_lower for nav in nav_text):
+            return False
+        
+        # Prefer external links or links that look like articles
+        if not href.startswith(self.base_url):
+            return True
+        
+        # For internal links, look for article-like patterns
+        article_indicators = ['article', 'post', 'news', 'story', 'blog']
+        if any(indicator in href_lower for indicator in article_indicators):
+            return True
+        
+        # If text looks like an article title (reasonable length, capitalized)
+        words = text.split()
+        if 3 <= len(words) <= 20 and any(word[0].isupper() for word in words):
+            return True
+        
+        return False
+    
+    def open_tabs_in_chrome(self, links: List[str]) -> bool:
+        """Open all links in new tabs in Chrome."""
+        if not links:
+            self.logger.warning("No links to open")
+            return False
+        
+        driver = None
+        try:
+            driver = self.setup_chrome_driver()
+            
+            # First, navigate to the main newsletter page
+            self.logger.info(f"Opening main page: {self.base_url}")
+            driver.get(self.base_url)
+            self.wait_for_page_load(driver)
+            
+            # Open each article link in a new tab
+            for i, link in enumerate(links, 1):
+                try:
+                    self.logger.info(f"Opening tab {i}/{len(links)}: {link}")
+                    driver.execute_script(f"window.open('{link}', '_blank');")
+                    time.sleep(1)  # Small delay between tab openings
+                except Exception as e:
+                    self.logger.error(f"Failed to open tab for {link}: {e}")
+                    continue
+            
+            self.logger.info(f"Successfully opened {len(links)} tabs")
+            
+            # Switch to the first tab (main newsletter)
+            driver.switch_to.window(driver.window_handles[0])
+            
+            # Keep the browser open - don't close the driver
+            # The user can manually close it when done reading
+            self.logger.info("Browser will remain open for user interaction")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Failed to open tabs in Chrome: {e}")
+            if driver:
+                try:
+                    driver.quit()
+                except:
+                    pass
+            return False
+    
+    def run_automation(self) -> bool:
+        """Run the complete automation workflow."""
+        self.logger.info("Starting Neuron Newsletter automation")
+        
+        # Check if it's a weekday
+        if not self.is_weekday():
+            self.logger.info("Not a weekday - skipping automation")
+            return True
+        
+        # Check internet connectivity
+        if not self.check_internet_connectivity():
+            self.logger.error("No internet connection - cannot proceed")
+            return False
+        
+        # Retry mechanism for the main workflow
+        for attempt in range(1, self.max_retries + 1):
+            self.logger.info(f"Automation attempt {attempt}/{self.max_retries}")
+            
+            driver = None
+            try:
+                # Setup driver and load main page
+                driver = self.setup_chrome_driver()
+                self.logger.info(f"Loading newsletter page: {self.base_url}")
+                driver.get(self.base_url)
+                
+                if not self.wait_for_page_load(driver):
+                    raise TimeoutException("Page failed to load completely")
+                
+                # Extract links from the newsletter
+                links = self.extract_newsletter_links(driver)
+                
+                if not links:
+                    self.logger.warning("No newsletter links found")
+                    # Still open the main page
+                    self.logger.info("Opening main newsletter page only")
+                    # Keep driver open for user
+                    return True
+                
+                # Close the driver used for link extraction
+                driver.quit()
+                driver = None
+                
+                # Open all tabs in a fresh browser window
+                if self.open_tabs_in_chrome(links):
+                    self.logger.info("Automation completed successfully")
+                    return True
+                else:
+                    raise Exception("Failed to open tabs")
+                
+            except Exception as e:
+                self.logger.error(f"Attempt {attempt} failed: {e}")
+                if driver:
+                    try:
+                        driver.quit()
+                    except:
+                        pass
+                
+                if attempt < self.max_retries:
+                    self.logger.info(f"Retrying in {self.retry_delay} seconds...")
+                    time.sleep(self.retry_delay)
+                else:
+                    self.logger.error("All retry attempts failed")
+                    return False
+        
+        return False
+
+
+def main():
+    """Main entry point for the script."""
+    try:
+        automation = NeuronNewsletterAutomation()
+        success = automation.run_automation()
+        sys.exit(0 if success else 1)
+    except KeyboardInterrupt:
+        print("\nAutomation interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

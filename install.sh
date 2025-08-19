@@ -1,0 +1,214 @@
+#!/bin/bash
+set -e
+
+# Neuron Newsletter Automation - Installation Script
+# ================================================
+
+SCRIPT_NAME="neuron-automation"
+INSTALL_DIR="/usr/local/bin"
+SERVICE_DIR="/etc/systemd/system"
+CONFIG_DIR="$HOME/.config/neuron-automation"
+
+echo "🚀 Installing Neuron Newsletter Automation..."
+
+# Check if running as root for system files
+if [[ $EUID -eq 0 ]]; then
+    echo "❌ Please run this script as a regular user (not root)"
+    echo "   The script will ask for sudo privileges when needed"
+    exit 1
+fi
+
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Update system packages
+echo "📦 Updating system packages..."
+sudo apt update
+
+# Install required system packages
+echo "📦 Installing system dependencies..."
+sudo apt install -y python3 python3-pip python3-venv wget curl unzip
+
+# Install Google Chrome if not present
+if ! command_exists google-chrome; then
+    echo "🌐 Installing Google Chrome..."
+    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+    sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+    sudo apt update
+    sudo apt install -y google-chrome-stable
+else
+    echo "✅ Google Chrome already installed"
+fi
+
+# Create configuration directory
+echo "📁 Creating configuration directory..."
+mkdir -p "$CONFIG_DIR"
+
+# Create virtual environment
+echo "🐍 Setting up Python virtual environment..."
+VENV_DIR="$CONFIG_DIR/venv"
+python3 -m venv "$VENV_DIR"
+source "$VENV_DIR/bin/activate"
+
+# Install Python dependencies
+echo "📦 Installing Python packages..."
+pip install --upgrade pip
+pip install selenium webdriver-manager requests beautifulsoup4
+
+# Create requirements.txt for future reference
+cat > "$CONFIG_DIR/requirements.txt" << EOF
+selenium>=4.0.0
+webdriver-manager>=3.8.0
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+EOF
+
+# Create wrapper script
+echo "📝 Creating wrapper script..."
+sudo tee "$INSTALL_DIR/$SCRIPT_NAME" > /dev/null << EOF
+#!/bin/bash
+# Neuron Newsletter Automation Wrapper Script
+
+# Activate virtual environment
+source "$CONFIG_DIR/venv/bin/activate"
+
+# Set display for GUI applications
+export DISPLAY=:0.0
+
+# Run the Python script
+python3 "$CONFIG_DIR/neuron_automation.py" "\$@"
+EOF
+
+sudo chmod +x "$INSTALL_DIR/$SCRIPT_NAME"
+
+# Copy the Python script to config directory
+echo "📄 Installing main script..."
+cp neuron_automation.py "$CONFIG_DIR/"
+chmod +x "$CONFIG_DIR/neuron_automation.py"
+
+# Create systemd service file
+echo "⚙️ Creating systemd service..."
+sudo tee "$SERVICE_DIR/$SCRIPT_NAME.service" > /dev/null << EOF
+[Unit]
+Description=Neuron Daily Newsletter Automation
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=$USER
+Environment=HOME=$HOME
+Environment=DISPLAY=:0
+ExecStart=$INSTALL_DIR/$SCRIPT_NAME
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Create systemd timer for weekday mornings
+echo "⏰ Creating systemd timer..."
+sudo tee "$SERVICE_DIR/$SCRIPT_NAME.timer" > /dev/null << EOF
+[Unit]
+Description=Run Neuron Newsletter Automation on weekday mornings
+Requires=$SCRIPT_NAME.service
+
+[Timer]
+# Run Monday through Friday at 8:00 AM
+OnCalendar=Mon,Tue,Wed,Thu,Fri *-*-* 08:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# Enable and start the timer
+echo "🔄 Enabling systemd timer..."
+sudo systemctl daemon-reload
+sudo systemctl enable "$SCRIPT_NAME.timer"
+sudo systemctl start "$SCRIPT_NAME.timer"
+
+# Create desktop launcher (optional)
+DESKTOP_FILE="$HOME/.local/share/applications/$SCRIPT_NAME.desktop"
+mkdir -p "$(dirname "$DESKTOP_FILE")"
+cat > "$DESKTOP_FILE" << EOF
+[Desktop Entry]
+Name=Neuron Newsletter
+Comment=Open Neuron Daily Newsletter with all articles
+Exec=$INSTALL_DIR/$SCRIPT_NAME
+Icon=web-browser
+Terminal=false
+Type=Application
+Categories=Network;News;
+EOF
+
+# Create uninstall script
+cat > "$CONFIG_DIR/uninstall.sh" << 'EOF'
+#!/bin/bash
+# Uninstall Neuron Newsletter Automation
+
+echo "🗑️ Uninstalling Neuron Newsletter Automation..."
+
+# Stop and disable timer
+sudo systemctl stop neuron-automation.timer 2>/dev/null || true
+sudo systemctl disable neuron-automation.timer 2>/dev/null || true
+
+# Remove systemd files
+sudo rm -f /etc/systemd/system/neuron-automation.service
+sudo rm -f /etc/systemd/system/neuron-automation.timer
+
+# Reload systemd
+sudo systemctl daemon-reload
+
+# Remove main script
+sudo rm -f /usr/local/bin/neuron-automation
+
+# Remove desktop file
+rm -f "$HOME/.local/share/applications/neuron-automation.desktop"
+
+# Remove config directory (ask user)
+read -p "Remove configuration directory with logs? (y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    rm -rf "$HOME/.config/neuron-automation"
+    echo "✅ Configuration directory removed"
+else
+    echo "ℹ️ Configuration directory preserved at: $HOME/.config/neuron-automation"
+fi
+
+echo "✅ Uninstallation complete"
+EOF
+
+chmod +x "$CONFIG_DIR/uninstall.sh"
+
+echo ""
+echo "✅ Installation completed successfully!"
+echo ""
+echo "📋 Summary:"
+echo "   • Service installed: $SCRIPT_NAME.service"
+echo "   • Timer installed: $SCRIPT_NAME.timer (runs weekdays at 8:00 AM)"
+echo "   • Command: $SCRIPT_NAME"
+echo "   • Config: $CONFIG_DIR"
+echo "   • Logs: $CONFIG_DIR/neuron_automation.log"
+echo ""
+echo "🎮 Usage:"
+echo "   • Manual run: $SCRIPT_NAME"
+echo "   • Check timer: systemctl status $SCRIPT_NAME.timer"
+echo "   • Check logs: journalctl -u $SCRIPT_NAME.service"
+echo "   • View app logs: tail -f $CONFIG_DIR/neuron_automation.log"
+echo ""
+echo "⏰ The automation will run automatically every weekday at 8:00 AM"
+echo "   (with up to 5 minutes random delay to avoid server load)"
+echo ""
+echo "🗑️ To uninstall: $CONFIG_DIR/uninstall.sh"
+echo ""
+echo "🧪 Test the installation: $SCRIPT_NAME"
+
+# Show timer status
+echo ""
+echo "📊 Timer status:"
+systemctl status "$SCRIPT_NAME.timer" --no-pager -l || true
