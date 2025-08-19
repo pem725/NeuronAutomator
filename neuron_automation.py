@@ -134,14 +134,20 @@ class NeuronNewsletterAutomation:
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         
-        # Enable remote debugging to connect to existing Chrome instances
-        chrome_options.add_argument("--remote-debugging-port=9222")
+        # Browser persistence options
+        chrome_options.add_argument("--disable-extensions-except")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--disable-default-apps")
         
-        # Use regular Chrome profile instead of isolated one
-        # This allows tabs to open in your existing Chrome browser
+        # Prevent browser from closing when automation ends
+        chrome_options.add_experimental_option("detach", True)
         chrome_options.add_experimental_option("useAutomationExtension", False)
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        
+        # Enable remote debugging for connection attempts
+        chrome_options.add_argument("--remote-debugging-port=9222")
         
         try:
             # First try to connect to an existing Chrome instance
@@ -165,9 +171,10 @@ class NeuronNewsletterAutomation:
                 chrome_options.add_argument("--window-size=1920,1080")
                 chrome_options.add_argument("--start-maximized")
                 
-                # Don't specify user-data-dir to use default Chrome profile
+                # Browser persistence options for fallback
+                chrome_options.add_experimental_option("detach", True)
                 chrome_options.add_experimental_option("useAutomationExtension", False)
-                chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+                chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
                 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
                 
                 service = Service(ChromeDriverManager().install())
@@ -600,9 +607,17 @@ class NeuronNewsletterAutomation:
                 # Switch back to the main newsletter tab
                 driver.switch_to.window(driver.window_handles[0])
                 
-                # Don't close the driver - let user interact with tabs
-                self.logger.info(f"Successfully opened {len(links_to_open)} new tabs - browser will remain open")
-                self.logger.info("Automation completed successfully")
+                # Detach from browser to keep it open after script ends
+                self.logger.info(f"Successfully opened {len(links_to_open)} article tabs")
+                self.logger.info("Detaching from browser - tabs will remain open for reading")
+                
+                # Add a small delay to ensure all tabs are fully loaded
+                time.sleep(2)
+                
+                # Important: Don't call driver.quit() - let Chrome detach naturally
+                self.logger.info("🌅 Good morning! Your newsletter articles are ready to read.")
+                self.logger.info(f"📖 {len(links_to_open)} tabs opened in your browser")
+                
                 return True
                 
             except Exception as e:
