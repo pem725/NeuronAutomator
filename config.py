@@ -112,6 +112,7 @@ class Config:
     READING_STATS_ENABLED = True           # Track and show reading statistics
     DUPLICATE_DETECTION_ENABLED = True     # Prevent duplicate link opening
     BLACKLIST_CLEANUP_DAYS = 90            # Days to keep blacklisted link history
+    RECENT_LINK_DAYS = 1                   # Don't re-open links opened within this many days
     
     # Link Management Behavior
     BLACKLIST_ON_ERROR = False             # Auto-blacklist links that fail to load

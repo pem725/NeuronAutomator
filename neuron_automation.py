@@ -566,23 +566,20 @@ class NeuronNewsletterAutomation:
                     return True
                 
                 if self.link_manager:
-                    # Process links through LinkManager for deduplication and blacklist filtering
-                    self.logger.info(f"Processing {len(raw_links)} extracted links through LinkManager")
+                    # Analyze links through LinkManager (without storing in database yet)
+                    self.logger.info(f"Analyzing {len(raw_links)} extracted links through LinkManager")
                     
-                    # Get newsletter content hash for change tracking  
-                    newsletter_hash = self.get_content_hash(newsletter_url) or "unknown"
+                    # Analyze links to determine which ones should be opened
+                    analysis_result = self.link_manager.analyze_newsletter_links(raw_links)
+                    links_to_open = analysis_result['links_to_open']
+                    stats = analysis_result['statistics']
                     
-                    # Process links to determine which ones to open
-                    link_result = self.link_manager.process_newsletter_links(raw_links, newsletter_hash)
-                    links_to_open = link_result['links_to_open']
-                    stats = link_result['statistics']
-                    
-                    # Log link processing summary
+                    # Log link analysis summary
                     self.logger.info(f"Link Analysis: {stats['total_links']} total, "
                                    f"{stats['new_count']} new, "
                                    f"{stats['existing_count']} seen before, " 
                                    f"{stats['blacklisted_count']} blacklisted, "
-                                   f"{stats['opened_count']} will be opened")
+                                   f"{len(links_to_open)} will be opened")
                     
                     if not links_to_open:
                         self.logger.info("No new links to open - all content previously seen or blacklisted")
@@ -595,20 +592,29 @@ class NeuronNewsletterAutomation:
                 
                 # Open the determined article tabs
                 self.logger.info(f"Opening {len(links_to_open)} article tabs")
+                successfully_opened_links = []
+                
                 for i, link in enumerate(links_to_open, 1):
                     try:
                         self.logger.info(f"Opening tab {i}/{len(links_to_open)}: {link}")
                         driver.execute_script(f"window.open('{link}', '_blank');")
+                        successfully_opened_links.append(link)
                         time.sleep(1)  # Small delay between tab openings
                     except Exception as e:
                         self.logger.error(f"Failed to open tab for {link}: {e}")
                         continue
                 
+                # Record successfully opened links in database (only now!)
+                if self.link_manager and successfully_opened_links:
+                    newsletter_hash = self.get_content_hash(newsletter_url) or "unknown"
+                    record_result = self.link_manager.record_opened_links(successfully_opened_links, newsletter_hash)
+                    self.logger.info(f"Recorded {record_result['recorded_count']} successfully opened links in database")
+                
                 # Switch back to the main newsletter tab
                 driver.switch_to.window(driver.window_handles[0])
                 
                 # Detach from browser to keep it open after script ends
-                self.logger.info(f"Successfully opened {len(links_to_open)} article tabs")
+                self.logger.info(f"Successfully opened {len(successfully_opened_links)} article tabs")
                 self.logger.info("Detaching from browser - tabs will remain open for reading")
                 
                 # Add a small delay to ensure all tabs are fully loaded
@@ -616,7 +622,7 @@ class NeuronNewsletterAutomation:
                 
                 # Important: Don't call driver.quit() - let Chrome detach naturally
                 self.logger.info("🌅 Good morning! Your newsletter articles are ready to read.")
-                self.logger.info(f"📖 {len(links_to_open)} tabs opened in your browser")
+                self.logger.info(f"📖 {len(successfully_opened_links)} tabs opened in your browser")
                 
                 return True
                 

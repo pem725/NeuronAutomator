@@ -326,6 +326,214 @@ class LinkManager:
         
         return result
     
+    def analyze_newsletter_links(self, links: List[str]) -> Dict:
+        """
+        Analyze newsletter links without storing them in the database.
+        This determines which links should be opened without committing to database storage.
+        
+        Args:
+            links: List of URLs to analyze
+            
+        Returns:
+            Dict with categorized links and statistics for decision making
+        """
+        if not links:
+            return {
+                'new_links': [],
+                'existing_links': [],
+                'blacklisted_links': [],
+                'links_to_open': [],
+                'statistics': {'total_links': 0, 'new_count': 0, 'existing_count': 0, 'blacklisted_count': 0}
+            }
+        
+        result = {
+            'new_links': [],
+            'existing_links': [],
+            'blacklisted_links': [],
+            'links_to_open': [],
+            'statistics': {
+                'total_links': len(links),
+                'new_count': 0,
+                'existing_count': 0,
+                'blacklisted_count': 0
+            }
+        }
+        
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Analyze each link without storing
+            for url in links:
+                try:
+                    url_hash = self._hash_url(url)
+                    
+                    # Check if URL should be auto-blacklisted based on patterns
+                    auto_blacklist_reason = self._should_auto_blacklist_url(url)
+                    if auto_blacklist_reason:
+                        result['blacklisted_links'].append(url)
+                        result['statistics']['blacklisted_count'] += 1
+                        continue
+                    
+                    # Check if link already exists and its status
+                    cursor.execute("""
+                        SELECT id, is_blacklisted, last_seen
+                        FROM links WHERE url_hash = ?
+                    """, (url_hash,))
+                    
+                    existing_link = cursor.fetchone()
+                    
+                    if existing_link:
+                        link_id, is_blacklisted, last_seen_str = existing_link
+                        
+                        if is_blacklisted:
+                            result['blacklisted_links'].append(url)
+                            result['statistics']['blacklisted_count'] += 1
+                        else:
+                            # Check if link was opened recently (within last few days)
+                            from datetime import datetime, date
+                            
+                            # Parse last_seen date
+                            if last_seen_str:
+                                try:
+                                    if isinstance(last_seen_str, str):
+                                        last_seen_date = datetime.strptime(last_seen_str, '%Y-%m-%d').date()
+                                    else:
+                                        last_seen_date = last_seen_str
+                                    
+                                    days_since_opened = (date.today() - last_seen_date).days
+                                    
+                                    # Don't re-open links that were opened recently
+                                    recent_days_threshold = getattr(self.config, 'RECENT_LINK_DAYS', 3)
+                                    
+                                    if days_since_opened <= recent_days_threshold:
+                                        result['blacklisted_links'].append(url)
+                                        result['statistics']['blacklisted_count'] += 1
+                                        self.logger.debug(f"Skipping recently opened link ({days_since_opened} days ago): {url}")
+                                    else:
+                                        result['existing_links'].append(url)
+                                        result['statistics']['existing_count'] += 1
+                                        result['links_to_open'].append(url)
+                                        
+                                except (ValueError, TypeError):
+                                    # If date parsing fails, treat as normal existing link
+                                    result['existing_links'].append(url)
+                                    result['statistics']['existing_count'] += 1
+                                    result['links_to_open'].append(url)
+                            else:
+                                # No last_seen date, treat as normal existing link
+                                result['existing_links'].append(url)
+                                result['statistics']['existing_count'] += 1
+                                result['links_to_open'].append(url)
+                    else:
+                        # New link - add to open list
+                        result['new_links'].append(url)
+                        result['statistics']['new_count'] += 1
+                        result['links_to_open'].append(url)
+                
+                except Exception as e:
+                    self.logger.error(f"Error analyzing link {url}: {e}")
+                    continue
+            
+            self.logger.info(f"Analyzed {len(links)} links: {result['statistics']['new_count']} new, "
+                           f"{result['statistics']['existing_count']} existing, "
+                           f"{result['statistics']['blacklisted_count']} blacklisted, "
+                           f"{len(result['links_to_open'])} to open")
+            
+            return result
+    
+    def record_opened_links(self, links: List[str], newsletter_hash: str = None) -> Dict:
+        """
+        Record links that were actually opened in the browser.
+        This should only be called AFTER links have been successfully opened.
+        
+        Args:
+            links: List of URLs that were successfully opened
+            newsletter_hash: Optional hash of newsletter content for change tracking
+            
+        Returns:
+            Dict with recording statistics
+        """
+        if not links:
+            self.logger.info("No links to record as opened")
+            return {'recorded_count': 0}
+        
+        today = date.today()
+        now = datetime.now()
+        
+        # Run auto-blacklisting for old links if enabled
+        aged_count = self._auto_blacklist_old_links()
+        
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Create newsletter run record
+            cursor.execute("""
+                INSERT INTO newsletter_runs 
+                (run_date, run_time, newsletter_hash, links_found, opened_links, success)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (today, now, newsletter_hash, len(links), len(links), True))
+            
+            run_id = cursor.lastrowid
+            recorded_count = 0
+            
+            # Process each opened link
+            for position, url in enumerate(links, 1):
+                try:
+                    url_hash = self._hash_url(url)
+                    domain = self._extract_domain(url)
+                    
+                    # Check if link already exists
+                    cursor.execute("""
+                        SELECT id, seen_count
+                        FROM links WHERE url_hash = ?
+                    """, (url_hash,))
+                    
+                    existing_link = cursor.fetchone()
+                    
+                    if existing_link:
+                        link_id, seen_count = existing_link
+                        
+                        # Update existing link - increment seen count for opened links
+                        cursor.execute("""
+                            UPDATE links 
+                            SET last_seen = ?, seen_count = seen_count + 1
+                            WHERE id = ?
+                        """, (today, link_id))
+                        
+                    else:
+                        # Create new link record (only for successfully opened links)
+                        cursor.execute("""
+                            INSERT INTO links 
+                            (url, domain, first_seen, last_seen, url_hash)
+                            VALUES (?, ?, ?, ?, ?)
+                        """, (url, domain, today, today, url_hash))
+                        
+                        link_id = cursor.lastrowid
+                    
+                    # Record link appearance in this run
+                    cursor.execute("""
+                        INSERT OR IGNORE INTO link_appearances
+                        (link_id, run_id, position)
+                        VALUES (?, ?, ?)
+                    """, (link_id, run_id, position))
+                    
+                    recorded_count += 1
+                
+                except Exception as e:
+                    self.logger.error(f"Error recording opened link {url}: {e}")
+                    continue
+            
+            conn.commit()
+            
+            self.logger.info(f"Recorded {recorded_count} successfully opened links in database")
+            if aged_count > 0:
+                self.logger.info(f"Auto-blacklisted {aged_count} old links during cleanup")
+            
+            return {
+                'recorded_count': recorded_count,
+                'auto_blacklisted_aged': aged_count
+            }
+    
     def blacklist_url(self, url: str, reason: str = "read") -> bool:
         """
         Add a URL to the blacklist.
