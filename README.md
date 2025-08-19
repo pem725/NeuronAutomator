@@ -15,7 +15,7 @@
 - ✅ **Easy Installation**: Platform-specific installers or pip install
 - ✅ **Logging**: Detailed logging for troubleshooting
 - ✅ **Configuration**: Easily customizable settings
-- ✅ **Chrome Integration**: Uses your existing Chrome profile
+- ✅ **Chrome Integration**: Opens tabs in your regular Chrome browser (preserves existing tabs)
 - ✅ **Network Resilience**: Checks connectivity before running
 
 ## Quick Start
@@ -116,6 +116,21 @@ The automation uses a sophisticated **Phase 2** approach that combines multiple 
 - 7:00 AM → **NEW content detected!** → Proceeds (catches late publication)
 
 **Result: Perfect coverage with zero redundancy** ✨
+
+### **🌐 Chrome Browser Integration**
+
+The automation now uses your **regular Chrome browser** instead of creating isolated instances:
+
+**✅ Benefits:**
+- **Persistent Tabs**: Newsletter tabs remain open until you manually close them
+- **No Interruption**: If you get up late, your tabs from 5:30 AM are still there
+- **Regular Profile**: Uses your bookmarks, extensions, and settings
+- **Existing Windows**: Adds tabs to current Chrome windows when possible
+
+**📖 Reading Scenarios:**
+- **Early Bird (6:00 AM)**: Get fresh tabs, read immediately
+- **Late Riser (8:00 AM)**: Earlier tabs still open and waiting
+- **Multiple Runs**: Later runs add to existing tabs (smart detection prevents duplicates)
 
 ### System Management
 
@@ -252,7 +267,6 @@ python3 neuron_automation.py
 ├── neuron_automation.py      # Main script
 ├── config.py                 # Configuration file
 ├── venv/                     # Python virtual environment
-├── chrome_profile/           # Chrome user data directory
 ├── neuron_automation.log     # Application logs
 ├── requirements.txt          # Python dependencies
 └── uninstall.sh             # Uninstallation script
@@ -319,10 +333,11 @@ CONTENT_SELECTORS = [
 
 ## Security Considerations
 
-- The script uses your existing Chrome profile, preserving your cookies and settings
-- Chrome profile data is stored in `~/.config/neuron-automation/chrome_profile/`
-- Logs may contain URLs visited - review log files if sharing system access
+- The script opens tabs in your regular Chrome browser, using your existing profile and settings
+- When possible, it connects to existing Chrome instances rather than creating new ones
+- Logs may contain URLs visited - review log files if sharing system access  
 - The script only accesses the specified newsletter URL and extracted links
+- Browser tabs remain open until you manually close them, allowing you to read at your own pace
 
 ## Performance
 
@@ -436,8 +451,7 @@ The updater will:
 5. ✅ **Verify** the update completed successfully
 
 ### What's Preserved
-- Configuration files and customizations
-- Chrome profile data
+- Configuration files and customizations  
 - Application logs
 - Content change detection cache
 

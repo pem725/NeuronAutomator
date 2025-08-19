@@ -103,27 +103,55 @@ class NeuronNewsletterAutomation:
     
     def setup_chrome_driver(self) -> webdriver.Chrome:
         """Setup and return Chrome WebDriver with appropriate options."""
-        self.logger.info("Setting up Chrome WebDriver")
+        self.logger.info("Setting up Chrome WebDriver to use regular browser")
         
         chrome_options = Options()
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument("--start-maximized")
         
-        # Add user data directory for persistence
-        user_data_dir = self.config_path / 'chrome_profile'
-        user_data_dir.mkdir(exist_ok=True)
-        chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+        # Enable remote debugging to connect to existing Chrome instances
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        
+        # Use regular Chrome profile instead of isolated one
+        # This allows tabs to open in your existing Chrome browser
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         
         try:
-            # Use webdriver-manager to automatically handle ChromeDriver
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-            driver.set_page_load_timeout(self.page_load_timeout)
-            self.logger.info("Chrome WebDriver setup successful")
-            return driver
+            # First try to connect to an existing Chrome instance
+            try:
+                self.logger.info("Attempting to connect to existing Chrome instance...")
+                chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=chrome_options)
+                driver.set_page_load_timeout(self.page_load_timeout)
+                self.logger.info("Connected to existing Chrome instance")
+                return driver
+            except Exception as e:
+                self.logger.info(f"No existing Chrome instance found: {e}")
+                
+                # Fall back to starting new Chrome instance with regular profile
+                self.logger.info("Starting new Chrome instance with regular profile...")
+                chrome_options = Options()
+                chrome_options.add_argument("--no-sandbox")
+                chrome_options.add_argument("--disable-dev-shm-usage")
+                chrome_options.add_argument("--disable-gpu")
+                chrome_options.add_argument("--window-size=1920,1080")
+                chrome_options.add_argument("--start-maximized")
+                
+                # Don't specify user-data-dir to use default Chrome profile
+                chrome_options.add_experimental_option("useAutomationExtension", False)
+                chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+                chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+                
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=chrome_options)
+                driver.set_page_load_timeout(self.page_load_timeout)
+                self.logger.info("New Chrome instance created with regular profile")
+                return driver
+                
         except Exception as e:
             self.logger.error(f"Failed to setup Chrome WebDriver: {e}")
             raise
@@ -233,49 +261,6 @@ class NeuronNewsletterAutomation:
         
         return False
     
-    def open_tabs_in_chrome(self, links: List[str]) -> bool:
-        """Open all links in new tabs in Chrome."""
-        if not links:
-            self.logger.warning("No links to open")
-            return False
-        
-        driver = None
-        try:
-            driver = self.setup_chrome_driver()
-            
-            # First, navigate to the main newsletter page
-            self.logger.info(f"Opening main page: {self.base_url}")
-            driver.get(self.base_url)
-            self.wait_for_page_load(driver)
-            
-            # Open each article link in a new tab
-            for i, link in enumerate(links, 1):
-                try:
-                    self.logger.info(f"Opening tab {i}/{len(links)}: {link}")
-                    driver.execute_script(f"window.open('{link}', '_blank');")
-                    time.sleep(1)  # Small delay between tab openings
-                except Exception as e:
-                    self.logger.error(f"Failed to open tab for {link}: {e}")
-                    continue
-            
-            self.logger.info(f"Successfully opened {len(links)} tabs")
-            
-            # Switch to the first tab (main newsletter)
-            driver.switch_to.window(driver.window_handles[0])
-            
-            # Keep the browser open - don't close the driver
-            # The user can manually close it when done reading
-            self.logger.info("Browser will remain open for user interaction")
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"Failed to open tabs in Chrome: {e}")
-            if driver:
-                try:
-                    driver.quit()
-                except:
-                    pass
-            return False
     
     def get_content_hash(self) -> Optional[str]:
         """Get hash of key newsletter content areas for change detection."""
@@ -422,21 +407,28 @@ class NeuronNewsletterAutomation:
                 
                 if not links:
                     self.logger.warning("No newsletter links found")
-                    # Still open the main page
-                    self.logger.info("Opening main newsletter page only")
-                    # Keep driver open for user
+                    self.logger.info("Keeping main newsletter page open")
+                    # Keep driver open with just the main page
                     return True
                 
-                # Close the driver used for link extraction
-                driver.quit()
-                driver = None
+                # Open article tabs in the same browser instance
+                self.logger.info(f"Opening {len(links)} article tabs in current browser")
+                for i, link in enumerate(links, 1):
+                    try:
+                        self.logger.info(f"Opening tab {i}/{len(links)}: {link}")
+                        driver.execute_script(f"window.open('{link}', '_blank');")
+                        time.sleep(1)  # Small delay between tab openings
+                    except Exception as e:
+                        self.logger.error(f"Failed to open tab for {link}: {e}")
+                        continue
                 
-                # Open all tabs in a fresh browser window
-                if self.open_tabs_in_chrome(links):
-                    self.logger.info("Automation completed successfully")
-                    return True
-                else:
-                    raise Exception("Failed to open tabs")
+                # Switch back to the main newsletter tab
+                driver.switch_to.window(driver.window_handles[0])
+                
+                # Don't close the driver - let user interact with tabs
+                self.logger.info(f"Successfully opened {len(links)} tabs - browser will remain open")
+                self.logger.info("Automation completed successfully")
+                return True
                 
             except Exception as e:
                 self.logger.error(f"Attempt {attempt} failed: {e}")
