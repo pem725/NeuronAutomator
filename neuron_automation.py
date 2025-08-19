@@ -669,6 +669,18 @@ def main():
     parser.add_argument("--export-links", type=str, metavar="FILE",
                        help="Export all link data to JSON file")
     
+    # Blacklist rewind commands
+    parser.add_argument("--rewind-preview", type=int, metavar="DAYS",
+                       help="Preview rewind operation for X days without making changes")
+    parser.add_argument("--rewind", type=int, metavar="DAYS",
+                       help="Rewind blacklist by X days (restores recently blacklisted links)")
+    parser.add_argument("--backup-blacklist", action="store_true",
+                       help="Create backup of current blacklist state")
+    parser.add_argument("--recent-blacklisted", type=int, metavar="DAYS", default=7,
+                       help="Show recently blacklisted links (default: 7 days)")
+    parser.add_argument("--no-backup", action="store_true",
+                       help="Skip automatic backup when performing rewind")
+    
     args = parser.parse_args()
     
     if args.check_updates:
@@ -676,8 +688,9 @@ def main():
         print("To update, run: ./update.sh (Linux/macOS) or update.bat (Windows)")
         sys.exit(0)
     
-    # Handle link management commands
-    if any([args.stats, args.blacklist, args.unblacklist, args.list_blacklisted, args.export_links]):
+    # Handle link management and rewind commands
+    if any([args.stats, args.blacklist, args.unblacklist, args.list_blacklisted, args.export_links,
+            args.rewind_preview, args.rewind, args.backup_blacklist, args.recent_blacklisted != 7]):
         if not LINK_MANAGER_AVAILABLE:
             print("❌ Link Management System not available.")
             print("   Please ensure link_manager.py is installed in the same directory.")
@@ -747,6 +760,95 @@ def main():
                 print(f"✅ Links exported to: {export_path}")
             else:
                 print(f"❌ Failed to export links")
+        
+        # Blacklist rewind commands
+        if args.rewind_preview or args.rewind or args.backup_blacklist or args.recent_blacklisted != 7:
+            # Import BlacklistRewind
+            try:
+                from blacklist_rewind import BlacklistRewind
+                rewind_tool = BlacklistRewind(
+                    automation.link_manager.db_path, 
+                    config=ACTIVE_CONFIG,
+                    logger=automation.logger
+                )
+            except ImportError:
+                print("❌ Blacklist rewind functionality not available.")
+                print("   Please ensure blacklist_rewind.py is installed in the same directory.")
+                sys.exit(1)
+            
+            if args.rewind_preview:
+                print(f"🔍 Preview: Rewind {args.rewind_preview} days")
+                print("=" * 50)
+                
+                preview = rewind_tool.preview_rewind(args.rewind_preview)
+                print(f"Cutoff date: {preview['cutoff_date']}")
+                print(f"Links to restore: {preview['restore_count']}")
+                
+                if preview['restore_count'] > 0:
+                    print(f"\n📊 Restoration breakdown:")
+                    for reason, count in preview['reason_breakdown'].items():
+                        print(f"  • {reason}: {count} links")
+                    
+                    print(f"\n📋 Links to restore (first 10):")
+                    for link in preview['links_to_restore'][:10]:
+                        print(f"  📅 {link['blacklisted_date']} - {link['url'][:60]}...")
+                    
+                    if len(preview['links_to_restore']) > 10:
+                        print(f"  ... and {len(preview['links_to_restore']) - 10} more")
+                else:
+                    print("✅ No links would be restored")
+            
+            if args.rewind:
+                print(f"⏪ Performing Rewind: {args.rewind} days")
+                print("=" * 50)
+                
+                # Show preview first
+                preview = rewind_tool.preview_rewind(args.rewind)
+                print(f"This will restore {preview['restore_count']} links to available status")
+                
+                if preview['restore_count'] == 0:
+                    print("✅ No links to restore - operation not needed")
+                else:
+                    # Perform rewind
+                    result = rewind_tool.perform_rewind(
+                        args.rewind, 
+                        create_backup=not args.no_backup
+                    )
+                    
+                    if result['success']:
+                        print(f"✅ Rewind complete!")
+                        print(f"   • Restored {result['restored_count']} links")
+                        print(f"   • Cutoff date: {result['cutoff_date']}")
+                        if result['backup_file']:
+                            print(f"   • Backup saved: {result['backup_file']}")
+                        print(f"\n🎯 These links are now available for opening again.")
+                    else:
+                        print("❌ Rewind operation failed")
+            
+            if args.backup_blacklist:
+                print("💾 Creating Blacklist Backup")
+                print("=" * 50)
+                backup_file = rewind_tool.create_backup()
+                print(f"✅ Backup created: {backup_file}")
+            
+            if args.recent_blacklisted != 7:
+                print(f"🕒 Recently Blacklisted Links (last {args.recent_blacklisted} days)")
+                print("=" * 60)
+                
+                recent_links = rewind_tool.list_recent_blacklists(args.recent_blacklisted)
+                
+                if not recent_links:
+                    print("No links blacklisted in the specified period.")
+                else:
+                    for link in recent_links[:15]:  # Show top 15
+                        print(f"📅 {link['days_ago']} days ago ({link['blacklisted_date']})")
+                        print(f"   🔗 {link['url']}")
+                        print(f"   📂 Domain: {link['domain']}")
+                        print(f"   💭 Reason: {link['reason']}")
+                        print()
+                    
+                    if len(recent_links) > 15:
+                        print(f"... and {len(recent_links) - 15} more")
         
         sys.exit(0)
     
