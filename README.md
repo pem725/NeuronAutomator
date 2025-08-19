@@ -1,5 +1,7 @@
 # Neuron Daily Newsletter Automation
 
+I love waking up every morning to read (listen) to the Neuron.  My wife and kids are still fast asleep and I get to dive into the world of AI via LLMs and chatbots.  What delays most of my morning is actually getting the content to display.  I want to see it all.  I want to test it all.  Sadly, I run out of time clicking on the links and only get to a small handful.  After a short consultation with my bubba (aka Claude; when asked if I could call him Bubba, he said, my name is claude...no humor man), we generated this optimal soluation for me.  If you find this works for you...SWEET!  Gimme a star or thumbs up or just use it.  Let me know how it goes.  I cannot believe how lucky I am to be alive in this brave new world.  
+
 **Cross-platform automation system** that automatically opens the latest Neuron Daily newsletter with all article links in separate tabs every weekday morning.
 
 **Supported Platforms:** Linux, macOS, Windows
