@@ -55,6 +55,14 @@ mkdir -p "$LAUNCHD_DIR"
 # Create virtual environment
 echo "🐍 Setting up Python virtual environment..."
 VENV_DIR="$CONFIG_DIR/venv"
+
+# Remove existing virtual environment if it exists
+if [ -d "$VENV_DIR" ]; then
+    echo "   Removing existing virtual environment..."
+    rm -rf "$VENV_DIR"
+fi
+
+# Create fresh virtual environment
 python3 -m venv "$VENV_DIR"
 source "$VENV_DIR/bin/activate"
 

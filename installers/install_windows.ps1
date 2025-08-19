@@ -71,6 +71,14 @@ New-Item -ItemType Directory -Path $CONFIG_DIR -Force | Out-Null
 # Create virtual environment
 Write-Host "🐍 Setting up Python virtual environment..." -ForegroundColor Yellow
 $VENV_DIR = "$CONFIG_DIR\venv"
+
+# Remove existing virtual environment if it exists
+if (Test-Path $VENV_DIR) {
+    Write-Host "   Removing existing virtual environment..." -ForegroundColor Yellow
+    Remove-Item $VENV_DIR -Recurse -Force
+}
+
+# Create fresh virtual environment
 python -m venv "$VENV_DIR"
 & "$VENV_DIR\Scripts\Activate.ps1"
 
