@@ -35,7 +35,7 @@ class Config:
         "--disable-gpu",
         "--window-size=1920,1080",
         "--start-maximized",
-        # "--headless",  # Uncomment for headless mode
+        "--headless",  # Headless mode enabled by default
     ]
     
     # Weekday settings (0=Monday, 6=Sunday)
