@@ -102,8 +102,9 @@ python "$CONFIG_DIR\neuron_automation.py" %*
 
 # Copy Python scripts
 Write-Host "📄 Installing main scripts..." -ForegroundColor Yellow
-Copy-Item "neuron_automation.py" "$CONFIG_DIR\" -Force
-Copy-Item "config.py" "$CONFIG_DIR\" -Force
+$SCRIPT_DIR = Split-Path -Parent $PSScriptRoot
+Copy-Item "$SCRIPT_DIR\neuron_automation.py" "$CONFIG_DIR\" -Force
+Copy-Item "$SCRIPT_DIR\config.py" "$CONFIG_DIR\" -Force
 
 # Create Task Scheduler XML configuration
 Write-Host "⏰ Creating Task Scheduler configuration..." -ForegroundColor Yellow

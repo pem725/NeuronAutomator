@@ -88,8 +88,9 @@ sudo chmod +x "$INSTALL_DIR/$SCRIPT_NAME"
 
 # Copy the Python script to config directory
 echo "📄 Installing main script..."
-cp neuron_automation.py "$CONFIG_DIR/"
-cp config.py "$CONFIG_DIR/"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cp "$SCRIPT_DIR/neuron_automation.py" "$CONFIG_DIR/"
+cp "$SCRIPT_DIR/config.py" "$CONFIG_DIR/"
 chmod +x "$CONFIG_DIR/neuron_automation.py"
 
 # Create launchd plist file
