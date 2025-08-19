@@ -1,13 +1,17 @@
 # Neuron Daily Newsletter Automation
 
-Automatically opens the latest Neuron Daily newsletter with all article links in separate tabs every weekday morning on Ubuntu.
+**Cross-platform automation system** that automatically opens the latest Neuron Daily newsletter with all article links in separate tabs every weekday morning.
+
+**Supported Platforms:** Linux, macOS, Windows
 
 ## Features
 
 - ✅ **Weekday Automation**: Runs only on Monday-Friday
 - ✅ **Intelligent Link Extraction**: Finds and filters relevant article links
 - ✅ **Error Recovery**: Robust retry mechanisms and comprehensive error handling
-- ✅ **System Integration**: Runs automatically at boot via systemd
+- ✅ **Cross-Platform**: Works on Linux, macOS, and Windows
+- ✅ **System Integration**: Automatic scheduling (systemd/launchd/Task Scheduler)
+- ✅ **Easy Installation**: Platform-specific installers or pip install
 - ✅ **Logging**: Detailed logging for troubleshooting
 - ✅ **Configuration**: Easily customizable settings
 - ✅ **Chrome Integration**: Uses your existing Chrome profile
@@ -15,33 +19,46 @@ Automatically opens the latest Neuron Daily newsletter with all article links in
 
 ## Quick Start
 
-### 1. Download the Files
-
-Create a directory and download the required files:
+### Option 1: pip Install (Recommended)
 
 ```bash
-mkdir ~/neuron-automation-setup
-cd ~/neuron-automation-setup
-
-# Download the files (you'll need to save these from the conversation):
-# - neuron_automation.py (main script)
-# - install.sh (installation script) 
-# - config.py (configuration file)
+pip install neuron-automation
+neuron-automation --setup
 ```
 
-### 2. Run the Installation
+### Option 2: Manual Installation
 
-Make the installation script executable and run it:
-
+1. **Clone or Download**
 ```bash
-chmod +x install.sh
-./install.sh
+git clone https://github.com/pem725/NeuronAutomator.git
+cd NeuronAutomator
+```
+
+2. **Run Platform-Specific Installer**
+
+#### Linux (Ubuntu/Debian)
+```bash
+chmod +x installers/install_linux.sh
+./installers/install_linux.sh
+```
+
+#### macOS
+```bash
+chmod +x installers/install_macos.sh
+./installers/install_macos.sh
+```
+
+#### Windows
+```powershell
+# Run PowerShell as Administrator
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\installers\install_windows.ps1
 ```
 
 The installer will:
-- Install system dependencies (Python, Chrome, etc.)
+- Install system dependencies (Python, Chrome, package managers)
 - Create a virtual environment with required packages
-- Set up systemd service and timer for automatic execution
+- Set up automatic scheduling (systemd/launchd/Task Scheduler)
 - Configure the system to run every weekday at 8:00 AM
 
 ### 3. Test the Installation

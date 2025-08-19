@@ -4,34 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python-based automation system that opens the Neuron Daily newsletter with all article links in separate Chrome tabs every weekday morning on Ubuntu. The system uses Selenium WebDriver for browser automation and integrates with systemd for scheduled execution.
+This is a cross-platform Python-based automation system that opens the Neuron Daily newsletter with all article links in separate Chrome tabs every weekday morning. Supports Linux, macOS, and Windows with platform-specific scheduling integration (systemd, launchd, Task Scheduler).
 
 ## Architecture
 
 **Main Components:**
 - `neuron_automation.py` - Core automation script with `NeuronNewsletterAutomation` class
-- `config.py` - Configuration management with different environment classes (Production, Development, Test)
-- `install.sh` - Complete system installation script
-- `test_installation.sh` - Comprehensive testing and validation script
+- `config.py` - Enhanced configuration with platform detection and environment classes
+- `setup.py` - pip installable package configuration
+- `installers/` - Platform-specific installation scripts
+  - `install_linux.sh` - Linux (Ubuntu/Debian) installer
+  - `install_macos.sh` - macOS installer with Homebrew integration
+  - `install_windows.ps1` - Windows PowerShell installer
 
-**System Integration:**
-- Uses systemd service and timer for automatic weekday execution
-- Creates virtual environment in `~/.config/neuron-automation/`
-- Installs system command wrapper at `/usr/local/bin/neuron-automation`
-- Chrome profile isolation in dedicated directory
+**Cross-Platform Architecture:**
+- Platform detection via `PlatformConfig` class
+- Automatic config directory selection per platform
+- Platform-specific scheduling integration:
+  - Linux: systemd service/timer
+  - macOS: launchd LaunchAgent
+  - Windows: Task Scheduler
+- Chrome profile isolation in platform-appropriate directories
 
 ## Development Commands
 
-**Installation and Setup:**
+**Package Installation:**
 ```bash
-chmod +x install.sh
-./install.sh
+pip install -e .  # Development install
+pip install neuron-automation  # Production install
+```
+
+**Platform-Specific Installation:**
+```bash
+# Linux
+./installers/install_linux.sh
+
+# macOS  
+./installers/install_macos.sh
+
+# Windows (PowerShell as Admin)
+.\installers\install_windows.ps1
 ```
 
 **Testing:**
 ```bash
-chmod +x test_installation.sh
-./test_installation.sh
+# Platform-specific tests
+./installers/test_linux.sh      # Linux
+./installers/test_macos.sh      # macOS
+# (Windows test script TBD)
 ```
 
 **Manual Execution:**
@@ -62,12 +82,19 @@ tail -f ~/.config/neuron-automation/neuron_automation.log
 
 ## Configuration Architecture
 
-The system uses a class-based configuration system with three environments:
-- `ProductionConfig` - Default weekday-only execution
-- `DevelopmentConfig` - Daily execution with verbose logging
+The system uses a multi-layered configuration system:
+
+**Platform Detection:**
+- `PlatformConfig` class automatically detects OS and returns appropriate config
+- Platform-specific directory paths and scheduling mechanisms
+- Cross-platform Chrome options and WebDriver integration
+
+**Environment Configurations:**
+- `LinuxConfig`, `MacOSConfig`, `WindowsConfig` - Platform-specific settings
+- `DevelopmentConfig` - Daily execution with verbose logging  
 - `TestConfig` - Minimal retries for testing
 
-Active configuration is controlled by `ACTIVE_CONFIG` variable in `config.py`.
+Active configuration auto-selected via `PlatformConfig.get_platform_settings()`.
 
 ## Key Technical Details
 

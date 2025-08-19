@@ -8,10 +8,45 @@ Modify these values to customize the behavior according to your needs.
 """
 
 import os
+import platform
 from pathlib import Path
 
+class PlatformConfig:
+    """Platform-specific configuration detection."""
+    
+    @staticmethod
+    def get_platform_settings():
+        """Return platform-specific configuration class."""
+        system = platform.system().lower()
+        if system == "darwin":
+            return MacOSConfig
+        elif system == "windows":
+            return WindowsConfig
+        else:
+            return LinuxConfig
+    
+    @staticmethod
+    def get_config_dir():
+        """Return platform-appropriate configuration directory."""
+        system = platform.system().lower()
+        if system == "darwin":
+            return Path.home() / "Library" / "Application Support" / "neuron-automation"
+        elif system == "windows":
+            return Path.home() / "AppData" / "Local" / "neuron-automation"
+        else:
+            return Path.home() / ".config" / "neuron-automation"
+    
+    @staticmethod
+    def get_install_dir():
+        """Return platform-appropriate installation directory."""
+        system = platform.system().lower()
+        if system == "windows":
+            return Path("C:") / "Program Files" / "neuron-automation"
+        else:
+            return Path("/usr/local/bin")
+
 class Config:
-    """Configuration class containing all settings."""
+    """Base configuration class containing all settings."""
     
     # Base URL for the Neuron Daily newsletter
     BASE_URL = "https://www.theneurondaily.com/"
@@ -23,10 +58,15 @@ class Config:
     ELEMENT_WAIT_TIMEOUT = 15       # Maximum time to wait for elements (seconds)
     TAB_OPEN_DELAY = 1              # Delay between opening tabs (seconds)
     
-    # Directory settings
-    CONFIG_DIR = Path.home() / '.config' / 'neuron-automation'
+    # Directory settings (platform-aware)
+    CONFIG_DIR = PlatformConfig.get_config_dir()
     LOG_FILE = CONFIG_DIR / 'neuron_automation.log'
     CHROME_PROFILE_DIR = CONFIG_DIR / 'chrome_profile'
+    INSTALL_DIR = PlatformConfig.get_install_dir()
+    
+    # Platform identification
+    PLATFORM = platform.system().lower()
+    SCHEDULER = "unknown"  # Override in platform-specific classes
     
     # Chrome browser settings
     CHROME_OPTIONS = [
@@ -158,9 +198,26 @@ class TestConfig(Config):
     CHROME_OPTIONS = Config.CHROME_OPTIONS + ["--headless"]
     CLOSE_BROWSER_ON_ERROR = True
 
-# Select which configuration to use
+# Platform-specific configurations
+class LinuxConfig(Config):
+    """Linux-specific configuration."""
+    SCHEDULER = "systemd"
+    SERVICE_DIR = Path("/etc/systemd/system")
+    
+class MacOSConfig(Config):
+    """macOS-specific configuration."""
+    SCHEDULER = "launchd"
+    LAUNCHD_DIR = Path.home() / "Library" / "LaunchAgents"
+    
+class WindowsConfig(Config):
+    """Windows-specific configuration."""
+    SCHEDULER = "taskscheduler"
+    # Windows Task Scheduler doesn't use file paths like Unix systems
+    TASK_NAME = "NeuronAutomation"
+
+# Auto-select platform configuration
 # Change this to DevelopmentConfig or TestConfig as needed
-ACTIVE_CONFIG = Config
+ACTIVE_CONFIG = PlatformConfig.get_platform_settings()
 
 # Validate the active configuration
 ACTIVE_CONFIG.validate_config()
