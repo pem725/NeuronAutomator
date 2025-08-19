@@ -42,7 +42,7 @@ entry_points = {
 
 setup(
     name="neuron-automation",
-    version="1.3.0",
+    version="1.4.0",
     author="AI Assistant",
     author_email="noreply@anthropic.com",
     description="Cross-platform automation for Neuron Daily newsletter",

@@ -104,6 +104,25 @@ class Config:
     MIN_TITLE_WORDS = 3             # Minimum words in article title
     MAX_TITLE_WORDS = 20            # Maximum words in article title
     
+    # Link Management Settings
+    LINK_MANAGEMENT_ENABLED = True         # Enable link storage and blacklisting
+    LINK_DATABASE_NAME = 'newsletter_links.db'  # Database filename
+    AUTO_BLACKLIST_ENABLED = False         # Enable automatic blacklisting
+    AUTO_BLACKLIST_DAYS = 30               # Days after which to auto-blacklist old links
+    READING_STATS_ENABLED = True           # Track and show reading statistics
+    DUPLICATE_DETECTION_ENABLED = True     # Prevent duplicate link opening
+    BLACKLIST_CLEANUP_DAYS = 90            # Days to keep blacklisted link history
+    
+    # Link Management Behavior
+    BLACKLIST_ON_ERROR = False             # Auto-blacklist links that fail to load
+    DOMAIN_BLACKLIST = []                  # List of domains to always blacklist
+    URL_PATTERN_BLACKLIST = [              # URL patterns to blacklist
+        '*/advertisement/*',
+        '*/ads/*', 
+        '*/sponsor/*',
+        '*/promoted/*'
+    ]
+    
     # Logging settings
     LOG_LEVEL = "INFO"              # DEBUG, INFO, WARNING, ERROR, CRITICAL
     LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"

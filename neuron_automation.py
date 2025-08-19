@@ -9,10 +9,10 @@ in separate tabs every weekday morning.
 Author: AI Assistant  
 Created: 2025
 License: MIT
-Version: 1.3.0
+Version: 1.4.0
 """
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __author__ = "AI Assistant"
 __license__ = "MIT"
 
@@ -22,6 +22,7 @@ import time
 import hashlib
 import logging
 import requests
+import sqlite3
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,6 +43,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Import configuration
 try:
     from config import ACTIVE_CONFIG
+    from link_manager import LinkManager
 except ImportError:
     # Fallback if config not found
     class DefaultConfig:
@@ -68,6 +70,13 @@ class NeuronNewsletterAutomation:
         self.retry_delay = 5
         self.page_load_timeout = 30
         self.element_wait_timeout = 15
+        
+        # Initialize Link Manager for tracking and blacklisting
+        self.link_manager = LinkManager(
+            database_path=self.config_path / getattr(ACTIVE_CONFIG, 'LINK_DATABASE_NAME', 'newsletter_links.db'),
+            config=ACTIVE_CONFIG,
+            logger=self.logger
+        )
         
         self.logger.info("NeuronNewsletterAutomation initialized")
     
@@ -403,19 +412,42 @@ class NeuronNewsletterAutomation:
                     raise TimeoutException("Page failed to load completely")
                 
                 # Extract links from the newsletter
-                links = self.extract_newsletter_links(driver)
+                raw_links = self.extract_newsletter_links(driver)
                 
-                if not links:
+                if not raw_links:
                     self.logger.warning("No newsletter links found")
                     self.logger.info("Keeping main newsletter page open")
                     # Keep driver open with just the main page
                     return True
                 
-                # Open article tabs in the same browser instance
-                self.logger.info(f"Opening {len(links)} article tabs in current browser")
-                for i, link in enumerate(links, 1):
+                # Process links through LinkManager for deduplication and blacklist filtering
+                self.logger.info(f"Processing {len(raw_links)} extracted links through LinkManager")
+                
+                # Get newsletter content hash for change tracking
+                newsletter_hash = self.get_content_hash() or "unknown"
+                
+                # Process links to determine which ones to open
+                link_result = self.link_manager.process_newsletter_links(raw_links, newsletter_hash)
+                links_to_open = link_result['links_to_open']
+                stats = link_result['statistics']
+                
+                # Log link processing summary
+                self.logger.info(f"Link Analysis: {stats['total_links']} total, "
+                               f"{stats['new_count']} new, "
+                               f"{stats['existing_count']} seen before, " 
+                               f"{stats['blacklisted_count']} blacklisted, "
+                               f"{stats['opened_count']} will be opened")
+                
+                if not links_to_open:
+                    self.logger.info("No new links to open - all content previously seen or blacklisted")
+                    self.logger.info("Keeping main newsletter page open")
+                    return True
+                
+                # Open only the new, non-blacklisted article tabs
+                self.logger.info(f"Opening {len(links_to_open)} new article tabs")
+                for i, link in enumerate(links_to_open, 1):
                     try:
-                        self.logger.info(f"Opening tab {i}/{len(links)}: {link}")
+                        self.logger.info(f"Opening tab {i}/{len(links_to_open)}: {link}")
                         driver.execute_script(f"window.open('{link}', '_blank');")
                         time.sleep(1)  # Small delay between tab openings
                     except Exception as e:
@@ -426,7 +458,7 @@ class NeuronNewsletterAutomation:
                 driver.switch_to.window(driver.window_handles[0])
                 
                 # Don't close the driver - let user interact with tabs
-                self.logger.info(f"Successfully opened {len(links)} tabs - browser will remain open")
+                self.logger.info(f"Successfully opened {len(links_to_open)} new tabs - browser will remain open")
                 self.logger.info("Automation completed successfully")
                 return True
                 
@@ -461,11 +493,87 @@ def main():
     parser.add_argument("--check-updates", action="store_true",
                        help="Check for available updates")
     
+    # Link management commands
+    parser.add_argument("--stats", action="store_true",
+                       help="Show reading statistics and link analysis")
+    parser.add_argument("--blacklist", type=str, metavar="URL",
+                       help="Add a URL to the blacklist")
+    parser.add_argument("--unblacklist", type=str, metavar="URL", 
+                       help="Remove a URL from the blacklist")
+    parser.add_argument("--list-blacklisted", action="store_true",
+                       help="List all blacklisted URLs")
+    parser.add_argument("--export-links", type=str, metavar="FILE",
+                       help="Export all link data to JSON file")
+    
     args = parser.parse_args()
     
     if args.check_updates:
         print(f"Current version: {__version__}")
         print("To update, run: ./update.sh (Linux/macOS) or update.bat (Windows)")
+        sys.exit(0)
+    
+    # Handle link management commands
+    if any([args.stats, args.blacklist, args.unblacklist, args.list_blacklisted, args.export_links]):
+        automation = NeuronNewsletterAutomation()
+        
+        if args.stats:
+            stats = automation.link_manager.get_reading_statistics()
+            print("\n📊 Reading Statistics")
+            print("=" * 50)
+            print(f"Total links encountered: {stats['total_links_encountered']}")
+            print(f"Blacklisted links: {stats['blacklisted_links']}")
+            print(f"Active links: {stats['active_links']}")
+            print(f"Automation runs: {stats['total_automation_runs']}")
+            print(f"Reading efficiency: {stats['reading_efficiency_percent']}%")
+            
+            print(f"\n🌐 Top Domains:")
+            for domain, count in list(stats['top_domains'].items())[:5]:
+                print(f"  {domain}: {count} links")
+            
+            print(f"\n📈 Recent Activity (last 7 days):")
+            for activity in stats['recent_activity'][:7]:
+                print(f"  {activity['date']}: {activity['new_links']} new, {activity['opened_links']} opened")
+        
+        if args.blacklist:
+            if automation.link_manager.blacklist_url(args.blacklist, "manual"):
+                print(f"✅ Blacklisted: {args.blacklist}")
+            else:
+                print(f"❌ URL not found in database: {args.blacklist}")
+        
+        if args.unblacklist:
+            if automation.link_manager.unblacklist_url(args.unblacklist):
+                print(f"✅ Removed from blacklist: {args.unblacklist}")
+            else:
+                print(f"❌ URL not found in database: {args.unblacklist}")
+        
+        if args.list_blacklisted:
+            # Get blacklisted URLs
+            with sqlite3.connect(automation.link_manager.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT url, blacklisted_date, blacklist_reason
+                    FROM links 
+                    WHERE is_blacklisted = TRUE
+                    ORDER BY blacklisted_date DESC
+                """)
+                blacklisted = cursor.fetchall()
+            
+            if blacklisted:
+                print(f"\n🚫 Blacklisted URLs ({len(blacklisted)} total)")
+                print("=" * 60)
+                for url, date, reason in blacklisted:
+                    print(f"  {url}")
+                    print(f"    Date: {date}, Reason: {reason or 'not specified'}\n")
+            else:
+                print("No blacklisted URLs found.")
+        
+        if args.export_links:
+            export_path = Path(args.export_links)
+            if automation.link_manager.export_data(export_path):
+                print(f"✅ Links exported to: {export_path}")
+            else:
+                print(f"❌ Failed to export links")
+        
         sys.exit(0)
     
     try:
