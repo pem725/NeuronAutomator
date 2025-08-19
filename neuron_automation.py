@@ -6,10 +6,15 @@ Neuron Daily Newsletter Automation Script
 Automatically opens the latest Neuron Daily newsletter with all article links
 in separate tabs every weekday morning.
 
-Author: AI Assistant
+Author: AI Assistant  
 Created: 2025
 License: MIT
+Version: 1.2.0
 """
+
+__version__ = "1.2.0"
+__author__ = "AI Assistant"
+__license__ = "MIT"
 
 import os
 import sys
@@ -453,6 +458,24 @@ class NeuronNewsletterAutomation:
 
 def main():
     """Main entry point for the script."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description="Neuron Daily Newsletter Automation",
+        prog="neuron-automation"
+    )
+    parser.add_argument("--version", action="version", 
+                       version=f"%(prog)s {__version__}")
+    parser.add_argument("--check-updates", action="store_true",
+                       help="Check for available updates")
+    
+    args = parser.parse_args()
+    
+    if args.check_updates:
+        print(f"Current version: {__version__}")
+        print("To update, run: ./update.sh (Linux/macOS) or update.bat (Windows)")
+        sys.exit(0)
+    
     try:
         automation = NeuronNewsletterAutomation()
         success = automation.run_automation()

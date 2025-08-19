@@ -127,8 +127,8 @@ Description=Run Neuron Newsletter Automation on weekday mornings
 Requires=$SCRIPT_NAME.service
 
 [Timer]
-# Run Monday through Friday at 6:00 AM
-OnCalendar=Mon,Tue,Wed,Thu,Fri *-*-* 06:00:00
+# Run Monday through Friday at 5:00 AM
+OnCalendar=Mon,Tue,Wed,Thu,Fri *-*-* 05:00:00
 Persistent=true
 RandomizedDelaySec=300
 
@@ -200,7 +200,7 @@ echo "✅ Installation completed successfully!"
 echo ""
 echo "📋 Summary:"
 echo "   • Service installed: $SCRIPT_NAME.service"
-echo "   • Timer installed: $SCRIPT_NAME.timer (runs weekdays at 6:00 AM)"
+echo "   • Timer installed: $SCRIPT_NAME.timer (runs weekdays at 5:00 AM)"
 echo "   • Command: $SCRIPT_NAME"
 echo "   • Config: $CONFIG_DIR"
 echo "   • Logs: $CONFIG_DIR/neuron_automation.log"
@@ -211,7 +211,7 @@ echo "   • Check timer: systemctl status $SCRIPT_NAME.timer"
 echo "   • Check logs: journalctl -u $SCRIPT_NAME.service"
 echo "   • View app logs: tail -f $CONFIG_DIR/neuron_automation.log"
 echo ""
-echo "⏰ The automation will run automatically every weekday at 6:00 AM"
+echo "⏰ The automation will run automatically every weekday at 5:00 AM"
 echo "   (with up to 5 minutes random delay to avoid server load)"
 echo ""
 echo "🗑️ To uninstall: $CONFIG_DIR/uninstall.sh"

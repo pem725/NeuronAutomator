@@ -130,7 +130,7 @@ Installation Process:
 2. Follow the prompts
 3. Test with: neuron-automation
 
-The automation will then run automatically every weekday at 6:00 AM.
+The automation will then run automatically every weekday at 5:00 AM.
 
 For support and troubleshooting, see README.md
 EOF

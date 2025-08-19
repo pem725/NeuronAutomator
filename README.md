@@ -59,7 +59,7 @@ The installer will:
 - Install system dependencies (Python, Chrome, package managers)
 - Create a virtual environment with required packages
 - Set up automatic scheduling (systemd/launchd/Task Scheduler)
-- Configure the system to run every weekday at 6:00 AM
+- Configure the system to run every weekday at 5:00 AM
 
 ### 3. Test the Installation
 
@@ -74,12 +74,22 @@ This should open Chrome with the Neuron Daily newsletter and article tabs.
 ## Usage
 
 ### Automatic Operation
-The script runs automatically every weekday at 6:00 AM (with up to 5 minutes random delay).
+The script runs automatically every weekday at 5:00 AM (with up to 5 minutes random delay).
 
 ### Manual Operation
 Run manually anytime:
 ```bash
 neuron-automation
+```
+
+Check version:
+```bash
+neuron-automation --version
+```
+
+Check for updates:
+```bash
+neuron-automation --check-updates
 ```
 
 ### System Management
@@ -141,14 +151,14 @@ sudo systemctl edit neuron-automation.timer
 Add your custom schedule:
 ```ini
 [Timer]
-# Run at 7:30 AM instead of 6:00 AM
+# Run at 7:30 AM instead of 5:00 AM
 OnCalendar=Mon,Tue,Wed,Thu,Fri *-*-* 07:30:00
 ```
 
 Common schedule formats:
 - `*-*-* 09:00:00` - Daily at 9:00 AM
-- `Mon *-*-* 06:00:00` - Mondays only at 6:00 AM  
-- `*-*-01 06:00:00` - First day of every month
+- `Mon *-*-* 05:00:00` - Mondays only at 5:00 AM  
+- `*-*-01 05:00:00` - First day of every month
 
 ## Troubleshooting
 
@@ -375,3 +385,59 @@ For issues or questions:
 - Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
+
+## Updating
+
+The system includes an automatic update mechanism to easily upgrade to newer versions while preserving your configuration.
+
+### Easy Update Method
+
+**Linux/macOS:**
+```bash
+./update.sh
+```
+
+**Windows:**
+```batch
+update.bat
+```
+
+### Update Process
+The updater will:
+1. 📦 **Backup** your current configuration and logs
+2. 🌐 **Download** the latest version from GitHub
+3. 🔧 **Install** the new version using platform-specific installers
+4. 📂 **Restore** your preserved settings and data
+5. ✅ **Verify** the update completed successfully
+
+### What's Preserved
+- Configuration files and customizations
+- Chrome profile data
+- Application logs
+- Content change detection cache
+
+### Manual Update
+If the automatic updater doesn't work:
+
+1. **Download latest version:**
+   ```bash
+   git clone https://github.com/pem725/NeuronAutomator.git neuron-update
+   cd neuron-update
+   ```
+
+2. **Run installer:**
+   ```bash
+   # Linux
+   ./installers/install_linux.sh
+   
+   # macOS
+   ./installers/install_macos.sh
+   
+   # Windows (PowerShell as Admin)
+   .\installers\install_windows.ps1
+   ```
+
+### Version Management
+- Check current version: `neuron-automation --version`
+- Check for updates: `neuron-automation --check-updates`
+- View update history on [GitHub Releases](https://github.com/pem725/NeuronAutomator/releases)
