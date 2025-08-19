@@ -393,6 +393,15 @@ python3 neuron_automation.py
 python3 -c "from neuron_automation import NeuronNewsletterAutomation; n=NeuronNewsletterAutomation(); print(n.check_internet_connectivity())"
 ```
 
+### Project Roadmap
+
+See [TODO.md](TODO.md) for:
+- 📚 **Complete project history and evolution**
+- ✅ **Current implementation status**
+- 🚧 **Future enhancement ideas and priorities**
+- 💡 **Community and ecosystem possibilities**
+- 🔧 **Technical debt and maintenance tasks**
+
 ## Changelog
 
 ### Version 1.0.0
