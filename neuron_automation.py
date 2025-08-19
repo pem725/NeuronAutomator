@@ -194,6 +194,69 @@ class NeuronNewsletterAutomation:
             self.logger.warning("Page load timeout reached")
             return False
     
+    def find_latest_newsletter_url(self, driver: webdriver.Chrome) -> Optional[str]:
+        """Find the URL of the latest daily newsletter post."""
+        self.logger.info("Searching for latest newsletter post")
+        
+        try:
+            # Look for the JSON data containing post information
+            import json
+            import re
+            
+            # Get the page source and extract JSON data
+            page_source = driver.page_source
+            
+            # Look for paginatedPosts data in the page
+            json_pattern = r'"paginatedPosts":\s*({[^}]*"posts":\s*\[[^\]]*\][^}]*})'
+            match = re.search(json_pattern, page_source, re.DOTALL)
+            
+            if match:
+                try:
+                    # Extract and parse the posts data
+                    posts_data = json.loads(match.group(1))
+                    posts = posts_data.get('posts', [])
+                    
+                    if posts:
+                        # Get the first (most recent) post
+                        latest_post = posts[0]
+                        post_slug = latest_post.get('parameterized_web_title') or latest_post.get('slug')
+                        
+                        if post_slug:
+                            newsletter_url = f"{self.base_url}p/{post_slug}"
+                            self.logger.info(f"Found latest newsletter: {latest_post.get('web_title', 'Unknown Title')}")
+                            self.logger.info(f"Newsletter URL: {newsletter_url}")
+                            return newsletter_url
+                        else:
+                            self.logger.error("Could not extract post slug from latest post")
+                    else:
+                        self.logger.error("No posts found in JSON data")
+                        
+                except json.JSONDecodeError as e:
+                    self.logger.error(f"Failed to parse JSON data: {e}")
+            else:
+                self.logger.warning("Could not find paginatedPosts JSON in page source")
+            
+            # Fallback: Look for post links in the HTML
+            self.logger.info("Trying fallback method: searching for post links in HTML")
+            
+            # Look for links that match the /p/ pattern
+            post_links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/p/']")
+            
+            if post_links:
+                # Get the first post link
+                latest_link = post_links[0]
+                href = latest_link.get_attribute('href')
+                
+                if href and '/p/' in href:
+                    self.logger.info(f"Found latest newsletter via HTML fallback: {href}")
+                    return href
+                    
+        except Exception as e:
+            self.logger.error(f"Error finding latest newsletter URL: {e}")
+        
+        self.logger.error("Could not find latest newsletter URL")
+        return None
+    
     def extract_newsletter_links(self, driver: webdriver.Chrome) -> List[str]:
         """Extract all relevant links from the newsletter page."""
         self.logger.info("Extracting newsletter links")
@@ -205,12 +268,59 @@ class NeuronNewsletterAutomation:
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
             
-            # Find all links on the page
-            link_elements = driver.find_elements(By.TAG_NAME, "a")
-            self.logger.info(f"Found {len(link_elements)} total links on page")
+            # First, try to find the main content area of the newsletter post
+            content_selectors = [
+                "div[class*='post-content']",     # Common post content class
+                "article[class*='post']",         # Article element
+                "div[class*='newsletter']",       # Newsletter-specific content
+                "div[class*='content']",          # General content div
+                "main",                          # Main content element
+                ".available-content"             # Substack-style container
+            ]
             
-            # Filter for relevant article links
-            for link_elem in link_elements:
+            content_area = None
+            for selector in content_selectors:
+                try:
+                    content_area = driver.find_element(By.CSS_SELECTOR, selector)
+                    self.logger.info(f"Found content area using selector: {selector}")
+                    break
+                except:
+                    continue
+            
+            if not content_area:
+                self.logger.info("No specific content area found, using full page")
+                content_area = driver.find_element(By.TAG_NAME, "body")
+            
+            # Look for links within the content area, prioritizing list items and paragraphs
+            link_containers = []
+            
+            # Priority 1: Links in list items (most newsletter content is in lists)
+            list_items = content_area.find_elements(By.TAG_NAME, "li")
+            for li in list_items:
+                link_containers.extend(li.find_elements(By.TAG_NAME, "a"))
+            
+            # Priority 2: Links in paragraphs
+            paragraphs = content_area.find_elements(By.TAG_NAME, "p") 
+            for p in paragraphs:
+                link_containers.extend(p.find_elements(By.TAG_NAME, "a"))
+            
+            # Priority 3: All other links in content area (fallback)
+            if not link_containers:
+                link_containers = content_area.find_elements(By.TAG_NAME, "a")
+            
+            # Remove duplicate elements while preserving order
+            seen_elements = set()
+            unique_links = []
+            for link in link_containers:
+                element_id = id(link)
+                if element_id not in seen_elements:
+                    seen_elements.add(element_id)
+                    unique_links.append(link)
+            
+            self.logger.info(f"Found {len(unique_links)} unique link elements in newsletter content")
+            
+            # Process each link
+            for link_elem in unique_links:
                 try:
                     href = link_elem.get_attribute("href")
                     text = link_elem.text.strip()
@@ -218,7 +328,7 @@ class NeuronNewsletterAutomation:
                     if not href or not text:
                         continue
                     
-                    # Skip internal navigation and non-article links
+                    # Filter for relevant newsletter article links
                     if self.is_relevant_article_link(href, text):
                         absolute_url = urljoin(self.base_url, href)
                         if absolute_url not in links:
@@ -286,11 +396,12 @@ class NeuronNewsletterAutomation:
         return False
     
     
-    def get_content_hash(self) -> Optional[str]:
+    def get_content_hash(self, url: str = None) -> Optional[str]:
         """Get hash of key newsletter content areas for change detection."""
         try:
+            target_url = url or self.base_url
             timeout = getattr(ACTIVE_CONFIG, 'CONTENT_CHECK_TIMEOUT', 10)
-            response = requests.get(self.base_url, timeout=timeout, headers={
+            response = requests.get(target_url, timeout=timeout, headers={
                 'User-Agent': 'Mozilla/5.0 (compatible; NeuronAutomation/1.0)'
             })
             response.raise_for_status()
@@ -420,13 +531,25 @@ class NeuronNewsletterAutomation:
             try:
                 # Setup driver and load main page
                 driver = self.setup_chrome_driver()
-                self.logger.info(f"Loading newsletter page: {self.base_url}")
+                self.logger.info(f"Loading main page: {self.base_url}")
                 driver.get(self.base_url)
                 
                 if not self.wait_for_page_load(driver):
-                    raise TimeoutException("Page failed to load completely")
+                    raise TimeoutException("Main page failed to load completely")
                 
-                # Extract links from the newsletter
+                # Find the latest newsletter post URL
+                newsletter_url = self.find_latest_newsletter_url(driver)
+                if not newsletter_url:
+                    raise Exception("Could not find latest newsletter post")
+                
+                # Navigate to the specific newsletter post
+                self.logger.info(f"Loading latest newsletter post: {newsletter_url}")
+                driver.get(newsletter_url)
+                
+                if not self.wait_for_page_load(driver):
+                    raise TimeoutException("Newsletter post failed to load completely")
+                
+                # Extract links from the newsletter post
                 raw_links = self.extract_newsletter_links(driver)
                 
                 if not raw_links:
@@ -439,8 +562,8 @@ class NeuronNewsletterAutomation:
                     # Process links through LinkManager for deduplication and blacklist filtering
                     self.logger.info(f"Processing {len(raw_links)} extracted links through LinkManager")
                     
-                    # Get newsletter content hash for change tracking
-                    newsletter_hash = self.get_content_hash() or "unknown"
+                    # Get newsletter content hash for change tracking  
+                    newsletter_hash = self.get_content_hash(newsletter_url) or "unknown"
                     
                     # Process links to determine which ones to open
                     link_result = self.link_manager.process_newsletter_links(raw_links, newsletter_hash)
