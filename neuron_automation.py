@@ -43,14 +43,24 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Import configuration
 try:
     from config import ACTIVE_CONFIG
-    from link_manager import LinkManager
 except ImportError:
+    print("Warning: config.py not found, using defaults")
     # Fallback if config not found
     class DefaultConfig:
         ENABLE_CHANGE_DETECTION = True
         CONTENT_CHECK_TIMEOUT = 10
         CACHE_CLEANUP_DAYS = 7
-    ACTIVE_CONFIG = DefaultConfig()
+    ACTIVE_CONFIG = DefaultConfig
+
+# Import LinkManager with fallback
+try:
+    from link_manager import LinkManager
+    LINK_MANAGER_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: LinkManager not available: {e}")
+    print("Link management features will be disabled")
+    LinkManager = None
+    LINK_MANAGER_AVAILABLE = False
 
 
 class NeuronNewsletterAutomation:
@@ -71,12 +81,17 @@ class NeuronNewsletterAutomation:
         self.page_load_timeout = 30
         self.element_wait_timeout = 15
         
-        # Initialize Link Manager for tracking and blacklisting
-        self.link_manager = LinkManager(
-            database_path=self.config_path / getattr(ACTIVE_CONFIG, 'LINK_DATABASE_NAME', 'newsletter_links.db'),
-            config=ACTIVE_CONFIG,
-            logger=self.logger
-        )
+        # Initialize Link Manager for tracking and blacklisting (if available)
+        if LINK_MANAGER_AVAILABLE and getattr(ACTIVE_CONFIG, 'LINK_MANAGEMENT_ENABLED', True):
+            self.link_manager = LinkManager(
+                database_path=self.config_path / getattr(ACTIVE_CONFIG, 'LINK_DATABASE_NAME', 'newsletter_links.db'),
+                config=ACTIVE_CONFIG,
+                logger=self.logger
+            )
+            self.logger.info("Link Management System initialized")
+        else:
+            self.link_manager = None
+            self.logger.warning("Link Management System not available - running in legacy mode")
         
         self.logger.info("NeuronNewsletterAutomation initialized")
     
@@ -420,31 +435,36 @@ class NeuronNewsletterAutomation:
                     # Keep driver open with just the main page
                     return True
                 
-                # Process links through LinkManager for deduplication and blacklist filtering
-                self.logger.info(f"Processing {len(raw_links)} extracted links through LinkManager")
+                if self.link_manager:
+                    # Process links through LinkManager for deduplication and blacklist filtering
+                    self.logger.info(f"Processing {len(raw_links)} extracted links through LinkManager")
+                    
+                    # Get newsletter content hash for change tracking
+                    newsletter_hash = self.get_content_hash() or "unknown"
+                    
+                    # Process links to determine which ones to open
+                    link_result = self.link_manager.process_newsletter_links(raw_links, newsletter_hash)
+                    links_to_open = link_result['links_to_open']
+                    stats = link_result['statistics']
+                    
+                    # Log link processing summary
+                    self.logger.info(f"Link Analysis: {stats['total_links']} total, "
+                                   f"{stats['new_count']} new, "
+                                   f"{stats['existing_count']} seen before, " 
+                                   f"{stats['blacklisted_count']} blacklisted, "
+                                   f"{stats['opened_count']} will be opened")
+                    
+                    if not links_to_open:
+                        self.logger.info("No new links to open - all content previously seen or blacklisted")
+                        self.logger.info("Keeping main newsletter page open")
+                        return True
+                else:
+                    # Legacy mode: open all extracted links (no link management)
+                    links_to_open = raw_links
+                    self.logger.info("Link Management disabled - opening all extracted links (legacy mode)")
                 
-                # Get newsletter content hash for change tracking
-                newsletter_hash = self.get_content_hash() or "unknown"
-                
-                # Process links to determine which ones to open
-                link_result = self.link_manager.process_newsletter_links(raw_links, newsletter_hash)
-                links_to_open = link_result['links_to_open']
-                stats = link_result['statistics']
-                
-                # Log link processing summary
-                self.logger.info(f"Link Analysis: {stats['total_links']} total, "
-                               f"{stats['new_count']} new, "
-                               f"{stats['existing_count']} seen before, " 
-                               f"{stats['blacklisted_count']} blacklisted, "
-                               f"{stats['opened_count']} will be opened")
-                
-                if not links_to_open:
-                    self.logger.info("No new links to open - all content previously seen or blacklisted")
-                    self.logger.info("Keeping main newsletter page open")
-                    return True
-                
-                # Open only the new, non-blacklisted article tabs
-                self.logger.info(f"Opening {len(links_to_open)} new article tabs")
+                # Open the determined article tabs
+                self.logger.info(f"Opening {len(links_to_open)} article tabs")
                 for i, link in enumerate(links_to_open, 1):
                     try:
                         self.logger.info(f"Opening tab {i}/{len(links_to_open)}: {link}")
@@ -514,7 +534,17 @@ def main():
     
     # Handle link management commands
     if any([args.stats, args.blacklist, args.unblacklist, args.list_blacklisted, args.export_links]):
+        if not LINK_MANAGER_AVAILABLE:
+            print("❌ Link Management System not available.")
+            print("   Please ensure link_manager.py is installed in the same directory.")
+            sys.exit(1)
+            
         automation = NeuronNewsletterAutomation()
+        
+        if not automation.link_manager:
+            print("❌ Link Management System not initialized.")
+            print("   Check configuration or installation.")
+            sys.exit(1)
         
         if args.stats:
             stats = automation.link_manager.get_reading_statistics()

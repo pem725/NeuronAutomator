@@ -94,12 +94,25 @@ EOF
 
 sudo chmod +x "$INSTALL_DIR/$SCRIPT_NAME"
 
-# Copy the Python script to config directory
-echo "📄 Installing main script..."
+# Copy the Python scripts to config directory
+echo "📄 Installing main scripts..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Check that all required files exist
+REQUIRED_FILES=("neuron_automation.py" "config.py" "link_manager.py")
+for file in "${REQUIRED_FILES[@]}"; do
+    if [ ! -f "$SCRIPT_DIR/$file" ]; then
+        echo "❌ Error: Required file $file not found in $SCRIPT_DIR"
+        echo "   Please ensure all files are present and try again"
+        exit 1
+    fi
+done
+
 cp "$SCRIPT_DIR/neuron_automation.py" "$CONFIG_DIR/"
 cp "$SCRIPT_DIR/config.py" "$CONFIG_DIR/"
+cp "$SCRIPT_DIR/link_manager.py" "$CONFIG_DIR/"
 chmod +x "$CONFIG_DIR/neuron_automation.py"
+echo "✅ All Python scripts installed successfully"
 
 # Create launchd plist file
 echo "⏰ Creating launchd configuration..."
