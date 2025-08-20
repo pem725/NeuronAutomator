@@ -130,30 +130,16 @@ nav:
     - Troubleshooting: installation/troubleshooting.md
   - Features:
     - features/index.md
-    - Smart Scheduling System: features/smart-scheduling.md
-    - Link Management & Blacklisting: features/link-management.md
     - Time Rewind Tool: features/time-rewind.md
-    - Chrome Browser Integration: features/browser-integration.md
   - Configuration:
-    - configuration/index.md
+    - configuration/index.md  
     - Basic Configuration: configuration/basic-config.md
-    - Advanced Settings: configuration/advanced-settings.md
-    - Platform-Specific Setup: configuration/platform-setup.md
   - Usage:
     - usage/index.md
-    - Daily Operation: usage/daily-operation.md
-    - Manual Commands: usage/manual-commands.md
-    - System Management: usage/system-management.md
   - Reference:
     - reference/index.md
-    - Command Line Interface: reference/cli-reference.md
-    - Configuration Options: reference/config-reference.md
-    - File Structure: reference/file-structure.md
   - Contributing:
     - contributing/index.md
-    - Development Setup: contributing/development.md
-    - Testing: contributing/testing.md
-    - Documentation: contributing/documentation.md
 
 # Extra
 extra:

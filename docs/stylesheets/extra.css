@@ -129,14 +129,79 @@
   color: white;
 }
 
-/* Mobile responsiveness */
+/* Enhanced Mobile & Tablet Responsiveness */
 @media screen and (max-width: 768px) {
   .md-typeset .grid.cards {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 1rem 0;
   }
   
   .md-typeset .lg.middle {
     font-size: 1.5rem;
+  }
+  
+  /* Improve mobile navigation */
+  .md-nav__title {
+    font-size: 0.9rem;
+  }
+  
+  /* Better mobile tables */
+  .md-typeset table {
+    font-size: 0.85rem;
+  }
+  
+  /* Mobile-optimized buttons */
+  .md-button {
+    display: block;
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+  
+  /* Improved mobile code blocks */
+  .md-typeset pre code {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+}
+
+@media screen and (max-width: 1024px) and (min-width: 769px) {
+  /* Tablet-specific optimizations */
+  .md-typeset .grid.cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .md-typeset .lg.middle {
+    font-size: 1.75rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices */
+  .md-typeset .grid.cards > * {
+    padding: 1.25rem;
+    border-width: 2px;
+  }
+  
+  .md-button {
+    padding: 0.75rem 1.5rem;
+    min-height: 44px; /* iOS minimum touch target */
+  }
+  
+  /* Larger touch targets for navigation */
+  .md-nav__link {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* High-DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Crisp icons and graphics on retina displays */
+  .md-typeset .lg.middle {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
