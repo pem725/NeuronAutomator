@@ -47,12 +47,7 @@ jobs:
       - name: Install MkDocs and dependencies
         run: |
           pip install --upgrade pip
-          pip install \
-            mkdocs-material \
-            mkdocs-git-revision-date-localized-plugin \
-            mkdocs-social-plugin \
-            pillow \
-            cairosvg
+          pip install -r docs-requirements.txt
 
       - name: Configure Git (for git-revision-date plugin)
         run: |
@@ -98,12 +93,7 @@ jobs:
       - name: Install MkDocs and dependencies
         run: |
           pip install --upgrade pip
-          pip install \
-            mkdocs-material \
-            mkdocs-git-revision-date-localized-plugin \
-            mkdocs-social-plugin \
-            pillow \
-            cairosvg
+          pip install -r docs-requirements.txt
 
       - name: Build documentation for Netlify
         run: |
