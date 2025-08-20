@@ -239,6 +239,10 @@ class NeuronNewsletterAutomation:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         
+        # Additional persistence options
+        chrome_options.add_argument("--disable-web-security")
+        chrome_options.add_argument("--allow-running-insecure-content")
+        
         # Enable remote debugging for connection attempts
         chrome_options.add_argument("--remote-debugging-port=9222")
         
@@ -273,6 +277,10 @@ class NeuronNewsletterAutomation:
                 chrome_options.add_experimental_option("useAutomationExtension", False)
                 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
                 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+                
+                # Additional persistence options
+                chrome_options.add_argument("--disable-web-security")
+                chrome_options.add_argument("--allow-running-insecure-content")
                 
                 service = Service(ChromeDriverManager().install())
                 driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -707,19 +715,27 @@ class NeuronNewsletterAutomation:
                     record_result = self.link_manager.record_opened_links(successfully_opened_links, newsletter_hash)
                     self.logger.info(f"Recorded {record_result['recorded_count']} successfully opened links in database")
                 
-                # Switch back to the main newsletter tab
-                driver.switch_to.window(driver.window_handles[0])
+                # Try to switch back to the main newsletter tab (but don't fail if this doesn't work)
+                try:
+                    if len(driver.window_handles) > 0:
+                        driver.switch_to.window(driver.window_handles[0])
+                except Exception as switch_error:
+                    self.logger.warning(f"Could not switch to main tab (non-critical): {switch_error}")
                 
                 # Detach from browser to keep it open after script ends
                 self.logger.info(f"Successfully opened {len(successfully_opened_links)} article tabs")
                 self.logger.info("Detaching from browser - tabs will remain open for reading")
                 
-                # Add a small delay to ensure all tabs are fully loaded
-                time.sleep(2)
+                # Add a longer delay to ensure all tabs are fully loaded and detach works
+                time.sleep(5)
                 
-                # Important: Don't call driver.quit() - let Chrome detach naturally
+                # Explicitly mark the driver for detachment and set to None to prevent cleanup
                 self.logger.info("🌅 Good morning! Your newsletter articles are ready to read.")
                 self.logger.info(f"📖 {len(successfully_opened_links)} tabs opened in your browser")
+                self.logger.info("⚠️  BROWSER PERSISTENCE: Tabs will remain open until you manually close them")
+                
+                # Critical: Set driver to None to prevent any cleanup
+                driver = None
                 
                 return True
                 

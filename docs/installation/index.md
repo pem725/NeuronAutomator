@@ -15,15 +15,15 @@ Get Neuron Daily Newsletter Automation running on your system in just a few minu
 
     [Get Started with Git Clone :octicons-arrow-right-24:](manual-setup.md){ .md-button .md-button--primary }
 
-=== "pip Install (Coming Soon)"
+=== "Simplified Installation (Planned)"
 
-    **Status**: Package not yet published to PyPI
+    **For non-technical users**: We're developing easier installation methods
 
-    - :material-alert-circle: Currently returns "package not found"
-    - :material-clock: Will be available in future release
-    - :material-information: Use Git Clone method for now
+    - :material-progress-download: One-click installers in development
+    - :material-application: Desktop app versions planned
+    - :material-information: Git Clone method currently most reliable
 
-    [Manual Setup Guide :octicons-arrow-right-24:](manual-setup.md){ .md-button .md-button--primary }
+    [Full Installation Guide :octicons-arrow-right-24:](manual-setup.md){ .md-button .md-button--primary }
 
 ## System Requirements
 

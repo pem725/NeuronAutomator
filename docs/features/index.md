@@ -12,7 +12,7 @@ Neuron Daily Newsletter Automation is packed with intelligent features designed 
 
     Multiple scheduled runs with intelligent change detection ensure perfect newsletter coverage without redundancy.
 
-    [:octicons-arrow-right-24: Learn more](smart-scheduling.md)
+    Multiple runs at 5:30, 6:00, 6:30, and 7:00 AM ensure coverage regardless of publication time.
 
 -   :material-link-variant:{ .lg .middle } **Advanced Link Management**
 
@@ -20,7 +20,7 @@ Neuron Daily Newsletter Automation is packed with intelligent features designed 
 
     Sophisticated blacklist system prevents duplicate reading and provides detailed analytics on your reading patterns.
 
-    [:octicons-arrow-right-24: Link Management](link-management.md)
+    Tracks opened links, prevents duplicates, and provides reading analytics with SQLite database.
 
 -   :material-history:{ .lg .middle } **Time Rewind Tool**
 
@@ -36,7 +36,7 @@ Neuron Daily Newsletter Automation is packed with intelligent features designed 
 
     Seamless browser integration with persistence, profile support, and intelligent window management.
 
-    [:octicons-arrow-right-24: Browser Integration](browser-integration.md)
+    Opens tabs in your regular Chrome browser with detach mode to keep tabs persistent after script ends.
 
 </div>
 
@@ -87,9 +87,8 @@ Neuron Daily Newsletter Automation is packed with intelligent features designed 
 
 | Method | Best For | Setup Time | Maintenance |
 |--------|----------|------------|-------------|
-| **pip install** | Python users | 2-3 minutes | Automatic updates |
-| **Manual install** | Full control | 5-10 minutes | Manual updates |
-| **Docker** | Containerization | 3-5 minutes | Container updates |
+| **Git Clone** | All users | 5-10 minutes | Built-in --update command |
+| **One-click (Planned)** | Non-technical users | 2-3 minutes | Automatic updates |
 
 ## Configuration Flexibility
 
@@ -171,17 +170,17 @@ Ready to dive deeper into specific features?
 
 <div class="grid cards" markdown>
 
--   **Smart Scheduling**
+-   **Time Rewind Tool**
     
-    Learn how the multi-run system ensures perfect newsletter coverage.
+    Go back in time to restore previously blacklisted content for re-learning.
     
-    [:octicons-arrow-right-24: Smart Scheduling](smart-scheduling.md)
+    [:octicons-arrow-right-24: Time Rewind](time-rewind.md)
 
--   **Link Management**
+-   **Complete Guide**
     
-    Understand the blacklist system and analytics capabilities.
+    Comprehensive blacklist rewind usage guide with examples and workflows.
     
-    [:octicons-arrow-right-24: Link Management](link-management.md)
+    [:octicons-arrow-right-24: Complete Guide](../BLACKLIST_REWIND_USAGE.md)
 
 -   **Configuration**
     

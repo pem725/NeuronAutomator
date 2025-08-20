@@ -106,17 +106,13 @@ Get up and running in under 5 minutes:
     
     This opens Chrome with the newsletter and all article tabs.
 
-=== "pip Install (Coming Soon)"
+=== "Alternative Methods"
 
-    **Note**: Package not yet on PyPI
+    **Looking for easier installation?**
     
-    ```bash
-    # This will work in future releases:
-    # pip install neuron-automation
-    # neuron-automation --setup
-    ```
+    We're working on simplified installation methods for non-technical users. For now, the Git Clone method is the most reliable approach.
     
-    Use Git Clone method for now.
+    See our [Installation Guide](installation/) for detailed step-by-step instructions.
 
 ## How It Works
 

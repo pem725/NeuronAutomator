@@ -125,7 +125,6 @@ nav:
   - Home: index.md
   - Installation:
     - installation/index.md
-    - Pip Install (Recommended): installation/pip-install.md
     - Manual Installation: installation/manual-setup.md
     - Troubleshooting: installation/troubleshooting.md
   - Features:

@@ -435,6 +435,41 @@ CONTENT_SELECTORS = [
 ]
 ```
 
+## Browser Behavior & Persistence
+
+### Why Tabs Stay Open
+The automation is designed to **keep your newsletter tabs open** after the script finishes:
+
+- ✅ **Intended Behavior**: Tabs remain open for you to read at your own pace
+- ✅ **Persistent Access**: Articles stay available until you manually close them
+- ✅ **Morning Ready**: Wake up to pre-opened content waiting for you
+- ✅ **No Rush**: Read articles throughout the day without time pressure
+
+### What You Should See
+1. **Script Opens**: Browser launches with main newsletter site
+2. **Newsletter Loads**: Latest newsletter post opens in new window
+3. **Tabs Open**: Article links open in additional tabs (one by one)
+4. **Script Ends**: Automation completes but **browser stays open**
+5. **Read When Ready**: All tabs remain accessible for reading
+
+### Troubleshooting Browser Closure
+
+If your browser closes immediately after opening tabs, this indicates an error occurred:
+
+```bash
+# Check the logs to see what went wrong
+tail -20 ~/.config/neuron-automation/neuron_automation.log
+
+# Try running manually with verbose output
+neuron-automation --verbose
+```
+
+**Common causes of premature closure:**
+- Network connectivity issues during tab loading
+- Chrome driver compatibility problems  
+- Permission or security restrictions
+- System resource limitations
+
 ## Security Considerations
 
 - The script opens tabs in your regular Chrome browser, using your existing profile and settings
