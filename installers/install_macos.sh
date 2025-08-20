@@ -111,6 +111,7 @@ done
 cp "$SCRIPT_DIR/neuron_automation.py" "$CONFIG_DIR/"
 cp "$SCRIPT_DIR/config.py" "$CONFIG_DIR/"
 cp "$SCRIPT_DIR/link_manager.py" "$CONFIG_DIR/"
+cp "$SCRIPT_DIR/blacklist_rewind.py" "$CONFIG_DIR/"
 chmod +x "$CONFIG_DIR/neuron_automation.py"
 echo "✅ All Python scripts installed successfully"
 
