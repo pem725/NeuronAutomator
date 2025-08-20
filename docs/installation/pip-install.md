@@ -1,13 +1,20 @@
-# pip Install (Recommended)
+# pip Install (Coming Soon)
 
-The fastest and easiest way to install Neuron Daily Newsletter Automation. Perfect for users familiar with Python package management.
+!!! warning "Package Not Available Yet"
+    The `neuron-automation` package is not yet published to PyPI. Running `pip install neuron-automation` will return "No matching distribution found".
 
-## Quick Installation
+## Current Status
+
+The package is **in development** and will be published to PyPI in a future release. For now, please use the [Git Clone installation method](manual-setup.md).
+
+## Future Installation (When Available)
+
+Once published, installation will be:
 
 === "Linux/macOS"
 
     ```bash
-    # Install the package
+    # Install the package (future release)
     pip install neuron-automation
     
     # Set up system integration
@@ -20,7 +27,7 @@ The fastest and easiest way to install Neuron Daily Newsletter Automation. Perfe
 === "Windows"
 
     ```powershell
-    # Install the package
+    # Install the package (future release)
     pip install neuron-automation
     
     # Set up system integration (run as Administrator)
@@ -30,8 +37,42 @@ The fastest and easiest way to install Neuron Daily Newsletter Automation. Perfe
     neuron-automation
     ```
 
-!!! success "Installation Complete!"
-    If the test run opens Chrome with newsletter tabs, you're all set! The system will now run automatically every weekday morning.
+## Why Not Available Yet?
+
+Publishing to PyPI requires:
+- Package testing and validation
+- PyPI account setup and verification
+- Release automation configuration
+- Documentation completion
+
+## Current Alternative
+
+**Use the Git Clone method instead:**
+
+```bash
+# Clone the repository
+git clone https://github.com/pem725/NeuronAutomator.git
+cd NeuronAutomator
+
+# Run platform-specific installer
+./installers/install_linux.sh     # Linux
+./installers/install_macos.sh     # macOS
+./installers/install_windows.ps1  # Windows (PowerShell as Admin)
+
+# Test installation
+neuron-automation
+
+# Update when needed
+neuron-automation --update
+```
+
+This method provides:
+- ✅ **Latest version** from GitHub
+- ✅ **Built-in updates** via `--update` command
+- ✅ **Same functionality** as pip would provide
+- ✅ **Complete system integration**
+
+## Future pip Installation Features
 
 ## What Happens During Setup
 

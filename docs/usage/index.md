@@ -73,6 +73,9 @@ neuron-automation --stats
 
 # Show version information  
 neuron-automation --version
+
+# Update to latest version
+neuron-automation --update
 ```
 
 ### Link Management Commands
@@ -103,8 +106,11 @@ neuron-automation --health-check
 # View effective configuration
 neuron-automation --show-config
 
-# Update system components
+# Update to latest version from GitHub
 neuron-automation --update
+
+# Check for available updates
+neuron-automation --check-updates
 ```
 
 ## 📊 Understanding Statistics

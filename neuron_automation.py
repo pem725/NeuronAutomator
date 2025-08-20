@@ -733,6 +733,88 @@ class NeuronNewsletterAutomation:
         return False
 
 
+def perform_update():
+    """
+    Update the Neuron Automation system from GitHub repository.
+    Returns True if successful, False otherwise.
+    """
+    try:
+        import tempfile
+        import shutil
+        import platform
+        
+        current_dir = Path(__file__).parent.absolute()
+        system = platform.system().lower()
+        
+        print("📥 Downloading latest version from GitHub...")
+        
+        # Create temporary directory for the update
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            
+            # Clone the latest version
+            clone_cmd = ["git", "clone", "https://github.com/pem725/NeuronAutomator.git", str(temp_path / "NeuronAutomator")]
+            result = subprocess.run(clone_cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                print(f"❌ Failed to download from GitHub: {result.stderr}")
+                return False
+            
+            print("✅ Downloaded latest version")
+            print("📦 Installing update...")
+            
+            # Get the path to the downloaded installer
+            installer_dir = temp_path / "NeuronAutomator" / "installers"
+            
+            # Run the appropriate installer
+            if system == "windows":
+                installer_script = installer_dir / "install_windows.ps1"
+                if installer_script.exists():
+                    # Run PowerShell installer
+                    install_cmd = ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(installer_script)]
+                else:
+                    print("❌ Windows installer not found")
+                    return False
+            elif system == "darwin":
+                installer_script = installer_dir / "install_macos.sh"
+                if installer_script.exists():
+                    # Make executable and run
+                    os.chmod(installer_script, 0o755)
+                    install_cmd = ["bash", str(installer_script)]
+                else:
+                    print("❌ macOS installer not found")
+                    return False
+            else:  # Linux
+                installer_script = installer_dir / "install_linux.sh"
+                if installer_script.exists():
+                    # Make executable and run
+                    os.chmod(installer_script, 0o755)
+                    install_cmd = ["bash", str(installer_script)]
+                else:
+                    print("❌ Linux installer not found")
+                    return False
+            
+            # Run the installer
+            print(f"🔧 Running installer for {system}...")
+            result = subprocess.run(install_cmd, capture_output=False, text=True)
+            
+            if result.returncode != 0:
+                print(f"❌ Installation failed with exit code {result.returncode}")
+                return False
+            
+            print("✅ Installation completed successfully")
+            return True
+            
+    except ImportError as e:
+        print(f"❌ Missing required modules for update: {e}")
+        return False
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Command failed: {e}")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error during update: {e}")
+        return False
+
 def main():
     """Main entry point for the script."""
     import argparse
@@ -745,6 +827,8 @@ def main():
                        version=f"%(prog)s {__version__}")
     parser.add_argument("--check-updates", action="store_true",
                        help="Check for available updates")
+    parser.add_argument("--update", action="store_true",
+                       help="Update to the latest version from GitHub")
     parser.add_argument("--setup", action="store_true",
                        help="Setup system integration after pip install")
     
@@ -776,8 +860,27 @@ def main():
     
     if args.check_updates:
         print(f"Current version: {__version__}")
-        print("To update, run: ./update.sh (Linux/macOS) or update.bat (Windows)")
+        print("To update, run: neuron-automation --update")
+        print("Or manually: git pull origin main && ./installers/install_linux.sh")
         sys.exit(0)
+    
+    if args.update:
+        print("🔄 Neuron Newsletter Automation Update")
+        print("=" * 50)
+        print("Updating from GitHub repository...")
+        
+        try:
+            update_result = perform_update()
+            if update_result:
+                print("✅ Update completed successfully!")
+                print("🔄 Please restart any running automation services.")
+                sys.exit(0)
+            else:
+                print("❌ Update failed. Check the error messages above.")
+                sys.exit(1)
+        except Exception as e:
+            print(f"❌ Update failed with error: {e}")
+            sys.exit(1)
     
     if args.setup:
         print("🚀 Neuron Newsletter Automation Setup")

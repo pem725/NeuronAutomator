@@ -75,16 +75,25 @@
 
 ## Quick Start
 
-### Option 1: pip Install (Recommended)
+### Option 1: Git Clone (Current Method)
 
 ```bash
-pip install neuron-automation
-neuron-automation --setup
+git clone https://github.com/pem725/NeuronAutomator.git
+cd NeuronAutomator
+./installers/install_linux.sh  # or install_macos.sh / install_windows.ps1
 ```
 
-### Option 2: Manual Installation
+### Option 2: pip Install (Coming Soon)
 
-1. **Clone or Download**
+```bash
+# Package not yet on PyPI - use git clone method above
+# pip install neuron-automation  # Will be available in future release
+# neuron-automation --setup
+```
+
+## Manual Installation Steps
+
+1. **Clone the Repository**
 ```bash
 git clone https://github.com/pem725/NeuronAutomator.git
 cd NeuronAutomator

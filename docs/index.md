@@ -83,18 +83,12 @@ This **cross-platform automation system** automatically opens the latest Neuron 
 
 ## Quick Start
 
-Get up and running in under 2 minutes:
+Get up and running in under 5 minutes:
 
-=== "pip Install"
-
-    ```bash
-    pip install neuron-automation
-    neuron-automation --setup
-    ```
-
-=== "Manual Install"
+=== "Git Clone (Current Method)"
 
     ```bash
+    # Clone and install
     git clone https://github.com/pem725/NeuronAutomator.git
     cd NeuronAutomator
     ./installers/install_linux.sh  # or install_macos.sh / install_windows.ps1
@@ -103,10 +97,26 @@ Get up and running in under 2 minutes:
 === "Test Run"
 
     ```bash
+    # Test the installation
     neuron-automation
+    
+    # Update when needed
+    neuron-automation --update
     ```
     
     This opens Chrome with the newsletter and all article tabs.
+
+=== "pip Install (Coming Soon)"
+
+    **Note**: Package not yet on PyPI
+    
+    ```bash
+    # This will work in future releases:
+    # pip install neuron-automation
+    # neuron-automation --setup
+    ```
+    
+    Use Git Clone method for now.
 
 ## How It Works
 

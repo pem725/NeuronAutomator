@@ -4,25 +4,24 @@ Get Neuron Daily Newsletter Automation running on your system in just a few minu
 
 ## Choose Your Installation Method
 
-=== "pip Install (Recommended)"
+=== "Git Clone (Recommended)"
 
-    **Best for**: Most users, especially those familiar with Python
+    **Best for**: Most users, direct from source
 
-    - :material-check-circle: Simplest installation process
-    - :material-check-circle: Automatic dependency management  
-    - :material-check-circle: Easy updates via pip
+    - :material-check-circle: Always latest version from GitHub
+    - :material-check-circle: Complete system integration
+    - :material-check-circle: Built-in update functionality
     - :material-check-circle: Works on all platforms
 
-    [Get Started with pip :octicons-arrow-right-24:](pip-install.md){ .md-button .md-button--primary }
+    [Get Started with Git Clone :octicons-arrow-right-24:](manual-setup.md){ .md-button .md-button--primary }
 
-=== "Manual Installation"
+=== "pip Install (Coming Soon)"
 
-    **Best for**: Users who want full control or don't use Python package managers
+    **Status**: Package not yet published to PyPI
 
-    - :material-check-circle: Complete system integration
-    - :material-check-circle: Platform-specific optimizations
-    - :material-check-circle: Includes all dependencies
-    - :material-check-circle: No Python knowledge required
+    - :material-alert-circle: Currently returns "package not found"
+    - :material-clock: Will be available in future release
+    - :material-information: Use Git Clone method for now
 
     [Manual Setup Guide :octicons-arrow-right-24:](manual-setup.md){ .md-button .md-button--primary }
 
