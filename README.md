@@ -20,6 +20,8 @@
 - ✅ **Logging**: Detailed logging for troubleshooting
 - ✅ **Configuration**: Easily customizable settings
 - ✅ **Chrome Integration**: Opens tabs in your regular Chrome browser (preserves existing tabs)
+- ✅ **Link Management**: Advanced blacklist system prevents duplicate reading and tracks analytics
+- ✅ **Time Rewind Tool**: Go back in time and restore previously blacklisted content for re-learning
 - ✅ **Network Resilience**: Checks connectivity before running
 
 ## Quick Start
@@ -171,6 +173,36 @@ Re-enable the timer:
 sudo systemctl enable neuron-automation.timer
 sudo systemctl start neuron-automation.timer
 ```
+
+## 📅 Blacklist Time Rewind Tool
+
+The **Time Rewind Tool** lets you "go back in time" and restore previously blacklisted links, making them available for reading again. Perfect for testing learning patterns, content review, and experimentation.
+
+### Quick Examples
+```bash
+# Preview what a 7-day rewind would restore (safe preview)
+neuron-automation --rewind-preview 7
+
+# Restore links blacklisted in the last 5 days
+neuron-automation --rewind 5
+
+# Show recently blacklisted content
+neuron-automation --recent-blacklisted 10
+
+# Use standalone tool with more options
+blacklist-rewind --stats
+blacklist-rewind --backup
+```
+
+### Use Cases
+- **🧪 Learning Experiments**: Test how re-introducing content affects retention
+- **📚 Content Review**: Bring back important articles for reinforcement learning
+- **🔄 Pattern Testing**: Experiment with different content exposure cycles
+- **🛡️ Recovery**: Undo accidental over-blacklisting of valuable content
+- **⏰ Content Rotation**: Manage long-term content availability strategically
+
+### Complete Documentation
+📖 **[Full Blacklist Rewind Usage Guide](BLACKLIST_REWIND_USAGE.md)** - Comprehensive guide with examples, best practices, and advanced workflows
 
 ## Configuration
 
