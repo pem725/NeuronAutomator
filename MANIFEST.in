@@ -1,0 +1,7 @@
+include README.md
+include requirements.txt
+include BLACKLIST_REWIND_USAGE.md
+include *.py
+recursive-include installers *.sh *.ps1 *.plist *.xml
+recursive-include tests *.py
+include test_*.py

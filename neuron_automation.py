@@ -63,6 +63,95 @@ except ImportError as e:
     LINK_MANAGER_AVAILABLE = False
 
 
+def setup_system_integration():
+    """
+    Setup system integration after pip install.
+    Downloads and runs the appropriate platform installer.
+    """
+    import platform
+    import urllib.request
+    import tempfile
+    import stat
+    
+    system = platform.system().lower()
+    
+    # GitHub raw URLs for installer scripts
+    base_url = "https://raw.githubusercontent.com/pem725/NeuronAutomator/main/installers/"
+    
+    if system == "linux":
+        installer_url = base_url + "install_linux.sh"
+        installer_name = "install_linux.sh"
+    elif system == "darwin":  # macOS
+        installer_url = base_url + "install_macos.sh"
+        installer_name = "install_macos.sh"
+    elif system == "windows":
+        installer_url = base_url + "install_windows.ps1"
+        installer_name = "install_windows.ps1"
+    else:
+        print(f"❌ Unsupported platform: {system}")
+        return False
+    
+    try:
+        print(f"📥 Downloading installer for {system}...")
+        
+        # Download installer to temp directory
+        with tempfile.NamedTemporaryFile(mode='wb', suffix=f'_{installer_name}', delete=False) as temp_file:
+            with urllib.request.urlopen(installer_url) as response:
+                temp_file.write(response.read())
+            temp_installer = temp_file.name
+        
+        # Make executable (Linux/macOS)
+        if system in ['linux', 'darwin']:
+            os.chmod(temp_installer, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
+        
+        print(f"✅ Downloaded installer: {installer_name}")
+        print(f"🔧 Running system integration setup...")
+        
+        # Run the installer
+        if system == "windows":
+            # For Windows, we need to run PowerShell
+            import subprocess
+            result = subprocess.run([
+                "powershell.exe", 
+                "-ExecutionPolicy", "Bypass",
+                "-File", temp_installer
+            ], capture_output=True, text=True)
+        else:
+            # For Linux/macOS, run the shell script
+            import subprocess
+            result = subprocess.run([temp_installer], capture_output=True, text=True)
+        
+        # Clean up temp file
+        os.unlink(temp_installer)
+        
+        if result.returncode == 0:
+            print("✅ System integration setup completed!")
+            print("\n📋 What was set up:")
+            if system == "linux":
+                print("   • systemd service and timer")
+                print("   • Chrome browser (if needed)")
+                print("   • Virtual environment with dependencies")
+            elif system == "darwin":
+                print("   • LaunchAgent for scheduling")
+                print("   • Chrome browser (if needed)")
+                print("   • Virtual environment with dependencies")
+            elif system == "windows":
+                print("   • Task Scheduler entries")
+                print("   • Chrome browser (if needed)")
+                print("   • Virtual environment with dependencies")
+            
+            return True
+        else:
+            print("❌ Installer failed:")
+            print("STDOUT:", result.stdout)
+            print("STDERR:", result.stderr)
+            return False
+            
+    except Exception as e:
+        print(f"❌ Setup failed: {e}")
+        return False
+
+
 class NeuronNewsletterAutomation:
     """Main class for automating Neuron Daily newsletter opening."""
     
@@ -656,6 +745,8 @@ def main():
                        version=f"%(prog)s {__version__}")
     parser.add_argument("--check-updates", action="store_true",
                        help="Check for available updates")
+    parser.add_argument("--setup", action="store_true",
+                       help="Setup system integration after pip install")
     
     # Link management commands
     parser.add_argument("--stats", action="store_true",
@@ -686,6 +777,27 @@ def main():
     if args.check_updates:
         print(f"Current version: {__version__}")
         print("To update, run: ./update.sh (Linux/macOS) or update.bat (Windows)")
+        sys.exit(0)
+    
+    if args.setup:
+        print("🚀 Neuron Newsletter Automation Setup")
+        print("=" * 50)
+        print("Setting up system integration after pip install...")
+        
+        try:
+            setup_result = setup_system_integration()
+            if setup_result:
+                print("✅ Setup completed successfully!")
+                print("\nNext steps:")
+                print("1. Test the installation: neuron-automation")
+                print("2. Check the schedule: systemctl status neuron-automation.timer (Linux)")
+                print("3. View logs: neuron-automation --stats")
+            else:
+                print("❌ Setup failed. Please check the output above.")
+                sys.exit(1)
+        except Exception as e:
+            print(f"❌ Setup failed: {e}")
+            sys.exit(1)
         sys.exit(0)
     
     # Handle link management and rewind commands

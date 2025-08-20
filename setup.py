@@ -37,6 +37,7 @@ extras_require = {
 entry_points = {
     'console_scripts': [
         'neuron-automation=neuron_automation:main',
+        'blacklist-rewind=blacklist_rewind:main',
     ],
 }
 
@@ -52,7 +53,7 @@ setup(
     
     # Package discovery
     packages=find_packages(),
-    py_modules=["neuron_automation", "config"],
+    py_modules=["neuron_automation", "config", "link_manager", "blacklist_rewind"],
     
     # Dependencies
     install_requires=install_requires,
@@ -64,8 +65,8 @@ setup(
     
     # Package data
     package_data={
-        '': ['README.md', 'CLAUDE.md', '*.sh', '*.ps1'],
-        'installers': ['*.sh', '*.ps1', '*.plist', '*.xml'],
+        '': ['README.md', 'requirements.txt', 'BLACKLIST_REWIND_USAGE.md', '*.py'],
+        'installers': ['*.sh', '*.ps1'],
     },
     include_package_data=True,
     
