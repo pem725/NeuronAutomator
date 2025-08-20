@@ -235,6 +235,59 @@ echo "🗑️ To uninstall: $CONFIG_DIR/uninstall.sh"
 echo ""
 echo "🧪 Test the installation: $SCRIPT_NAME"
 
+# Configure shell integration
+echo ""
+echo "🐚 Configuring shell integration..."
+
+# Detect user's shell and configuration files
+USER_SHELL=$(basename "$SHELL")
+echo "Detected shell: $USER_SHELL"
+
+# Function to safely add PATH to shell config
+add_to_shell_config() {
+    local config_file="$1"
+    local path_line='export PATH="/usr/local/bin:$PATH"'
+    
+    if [ -f "$config_file" ]; then
+        if ! grep -q "/usr/local/bin" "$config_file"; then
+            echo "Adding PATH to $config_file"
+            echo "" >> "$config_file"
+            echo "# Added by Neuron Automation installer" >> "$config_file" 
+            echo "$path_line" >> "$config_file"
+        else
+            echo "PATH already configured in $config_file"
+        fi
+    fi
+}
+
+# Configure for different shells
+case "$USER_SHELL" in
+    zsh)
+        echo "Configuring for Zsh..."
+        add_to_shell_config "$HOME/.zshrc"
+        
+        # Check for Oh My Zsh
+        if [ -d "$HOME/.oh-my-zsh" ]; then
+            echo "Oh My Zsh detected - configuration added to .zshrc"
+        fi
+        
+        # Also add to .zprofile if it exists
+        add_to_shell_config "$HOME/.zprofile"
+        ;;
+    bash)
+        echo "Configuring for Bash..."
+        add_to_shell_config "$HOME/.bashrc"
+        add_to_shell_config "$HOME/.bash_profile"
+        ;;
+    fish)
+        echo "Fish shell detected - please manually add /usr/local/bin to your PATH"
+        ;;
+    *)
+        echo "Unknown shell ($USER_SHELL) - adding to common config files..."
+        add_to_shell_config "$HOME/.profile"
+        ;;
+esac
+
 # Show timer status
 echo ""
 echo "📊 Timer status:"

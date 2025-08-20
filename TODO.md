@@ -84,6 +84,14 @@
 
 ### **Priority 1: High-Impact Improvements**
 
+#### **🔧 MUST DO SOON: Shell Compatibility (Critical)**
+- [ ] **Zsh Script Migration**: Convert all bash scripts to zsh for better user compatibility
+- [ ] **Dual Shell Support**: Maintain both bash and zsh versions of installation scripts  
+- [ ] **Shell Detection**: Enhanced detection of user's default shell (zsh, bash, fish, etc.)
+- [ ] **Configuration File Management**: Proper handling of .zshrc, .bashrc, .profile, etc.
+- [ ] **Oh My Zsh Integration**: Special handling for Oh My Zsh configurations
+- **Reason**: Most modern users (especially macOS) use zsh as default shell, current bash-only approach causes compatibility issues
+
 #### **🎯 Link Management Enhancements (Building on v1.4.0)**
 - [ ] **Auto-Blacklisting**: Automatically blacklist links older than X days
 - [ ] **Domain Blacklisting**: Blacklist entire domains or URL patterns

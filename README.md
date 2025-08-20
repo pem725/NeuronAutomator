@@ -63,9 +63,10 @@
 - ✅ **Optimal Newsletter Coverage**: Catches newsletters regardless of publication time (5:00-7:00 AM)
 - ✅ **Intelligent Link Extraction**: Finds and filters relevant article links
 - ✅ **Error Recovery**: Robust retry mechanisms and comprehensive error handling
-- ✅ **Cross-Platform**: Works on Linux, macOS, and Windows
+- ✅ **Cross-Platform**: Works on Linux, macOS, and Windows  
 - ✅ **System Integration**: Automatic scheduling (systemd/launchd/Task Scheduler)
 - ✅ **Easy Installation**: Platform-specific installers or pip install
+- ✅ **Shell Compatibility**: Auto-detects and configures bash, zsh, fish, and Oh My Zsh
 - ✅ **Logging**: Detailed logging for troubleshooting
 - ✅ **Configuration**: Easily customizable settings
 - ✅ **Chrome Integration**: Opens tabs in your regular Chrome browser (preserves existing tabs)
@@ -125,6 +126,8 @@ The installer will:
 - Create a virtual environment with required packages
 - Set up automatic scheduling (systemd/launchd/Task Scheduler)
 - Configure the system to run multiple times each weekday morning (5:30, 6:00, 6:30, 7:00 AM)
+- Detect and configure your shell (bash, zsh, fish) with proper PATH settings
+- Handle Oh My Zsh and other shell frameworks automatically
 
 ### 3. Test the Installation
 

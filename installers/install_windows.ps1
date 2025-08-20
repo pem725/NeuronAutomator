@@ -288,6 +288,47 @@ Write-Host "🗑️ To uninstall: PowerShell -File `"$CONFIG_DIR\uninstall.ps1`"
 Write-Host ""
 Write-Host "🧪 Test the installation: $SCRIPT_NAME" -ForegroundColor Green
 
+# Configure PowerShell profile integration
+Write-Host ""
+Write-Host "🐚 Configuring PowerShell integration..." -ForegroundColor Yellow
+
+# Add to PowerShell PATH if not already present
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+$neuronPath = "$env:USERPROFILE\.local\bin"
+
+if ($currentPath -notlike "*$neuronPath*") {
+    Write-Host "Adding to user PATH: $neuronPath" -ForegroundColor Green
+    [Environment]::SetEnvironmentVariable("Path", "$currentPath;$neuronPath", "User")
+    Write-Host "⚠️  IMPORTANT: Please restart PowerShell to apply PATH changes" -ForegroundColor Yellow
+} else {
+    Write-Host "PATH already configured for PowerShell" -ForegroundColor Green
+}
+
+# Configure PowerShell profiles for different shells
+$profiles = @(
+    $PROFILE.CurrentUserCurrentHost,
+    $PROFILE.CurrentUserAllHosts
+)
+
+foreach ($profilePath in $profiles) {
+    if ($profilePath -and (Test-Path $profilePath -PathType Leaf)) {
+        $profileContent = Get-Content $profilePath -Raw
+        if ($profileContent -notmatch "neuron-automation") {
+            Write-Host "Adding alias to PowerShell profile: $profilePath" -ForegroundColor Green
+            Add-Content $profilePath "`n# Added by Neuron Automation installer"
+            Add-Content $profilePath "# Ensure neuron-automation is available"
+            Add-Content $profilePath "`$env:Path += ';$neuronPath'"
+        } else {
+            Write-Host "PowerShell profile already configured: $profilePath" -ForegroundColor Green
+        }
+    }
+}
+
+# Check for Windows Terminal and suggest shell configuration
+if (Get-Command "wt" -ErrorAction SilentlyContinue) {
+    Write-Host "Windows Terminal detected - configuration applied to PowerShell profile" -ForegroundColor Cyan
+}
+
 # Show task status
 Write-Host ""
 Write-Host "📊 Scheduled Task status:" -ForegroundColor Cyan
