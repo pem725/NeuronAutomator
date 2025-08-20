@@ -76,6 +76,8 @@ class Config:
         "--window-size=1920,1080",
         "--start-maximized",
         "--headless",  # Headless mode enabled by default
+        "--autoplay-policy=document-user-activation-required",  # Disable video autoplay
+        "--disable-features=VizDisplayCompositor",  # Additional autoplay prevention
     ]
     
     # Weekday settings (0=Monday, 6=Sunday)

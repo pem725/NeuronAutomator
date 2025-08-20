@@ -223,6 +223,10 @@ class NeuronNewsletterAutomation:
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         
+        # Disable video autoplay
+        chrome_options.add_argument("--autoplay-policy=document-user-activation-required")
+        chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+        
         # Browser persistence options
         chrome_options.add_argument("--disable-extensions-except")
         chrome_options.add_argument("--disable-extensions")
@@ -259,6 +263,10 @@ class NeuronNewsletterAutomation:
                 chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--window-size=1920,1080")
                 chrome_options.add_argument("--start-maximized")
+                
+                # Disable video autoplay
+                chrome_options.add_argument("--autoplay-policy=document-user-activation-required")
+                chrome_options.add_argument("--disable-features=VizDisplayCompositor")
                 
                 # Browser persistence options for fallback
                 chrome_options.add_experimental_option("detach", True)
