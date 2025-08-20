@@ -366,7 +366,7 @@ tail -f ~/.config/neuron-automation/logs/rewind.log
 
 For comprehensive usage examples, advanced workflows, and best practices:
 
-📖 **[Full Blacklist Rewind Usage Guide](../../BLACKLIST_REWIND_USAGE.md)** 
+📖 **[Full Blacklist Rewind Usage Guide](../BLACKLIST_REWIND_USAGE.md)** 
 
 ---
 

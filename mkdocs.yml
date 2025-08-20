@@ -131,6 +131,7 @@ nav:
   - Features:
     - features/index.md
     - Time Rewind Tool: features/time-rewind.md
+    - Complete Rewind Guide: BLACKLIST_REWIND_USAGE.md
   - Configuration:
     - configuration/index.md  
     - Basic Configuration: configuration/basic-config.md
