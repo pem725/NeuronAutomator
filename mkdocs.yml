@@ -1,0 +1,172 @@
+site_name: Neuron Daily Newsletter Automation
+site_description: Cross-platform automation system for the Neuron Daily newsletter
+site_author: AI Assistant
+site_url: https://neuron-automator.netlify.app
+
+# Repository
+repo_name: pem725/NeuronAutomator
+repo_url: https://github.com/pem725/NeuronAutomator
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2025 AI Assistant
+
+# Configuration
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil 
+    view: material/eye
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - social
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: pem725
+      repo: NeuronAutomator
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - includes/mkdocs.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation
+nav:
+  - Home: index.md
+  - Installation:
+    - installation/index.md
+    - Pip Install (Recommended): installation/pip-install.md
+    - Manual Installation: installation/manual-setup.md
+    - Troubleshooting: installation/troubleshooting.md
+  - Features:
+    - features/index.md
+    - Smart Scheduling System: features/smart-scheduling.md
+    - Link Management & Blacklisting: features/link-management.md
+    - Time Rewind Tool: features/time-rewind.md
+    - Chrome Browser Integration: features/browser-integration.md
+  - Configuration:
+    - configuration/index.md
+    - Basic Configuration: configuration/basic-config.md
+    - Advanced Settings: configuration/advanced-settings.md
+    - Platform-Specific Setup: configuration/platform-setup.md
+  - Usage:
+    - usage/index.md
+    - Daily Operation: usage/daily-operation.md
+    - Manual Commands: usage/manual-commands.md
+    - System Management: usage/system-management.md
+  - Reference:
+    - reference/index.md
+    - Command Line Interface: reference/cli-reference.md
+    - Configuration Options: reference/config-reference.md
+    - File Structure: reference/file-structure.md
+  - Contributing:
+    - contributing/index.md
+    - Development Setup: contributing/development.md
+    - Testing: contributing/testing.md
+    - Documentation: contributing/documentation.md
+
+# Extra
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pem725/NeuronAutomator
+    - icon: fontawesome/solid/envelope
+      link: mailto:noreply@anthropic.com
+  generator: false
+
+# Custom CSS
+extra_css:
+  - stylesheets/extra.css
