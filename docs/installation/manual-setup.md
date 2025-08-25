@@ -326,4 +326,4 @@ To completely remove the manual installation:
 
 ---
 
-**Next**: [Configure your installation](../configuration/) to customize behavior and scheduling.
+**Next**: [Configure your installation](../configuration/index.md) to customize behavior and scheduling.

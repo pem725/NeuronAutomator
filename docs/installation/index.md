@@ -81,7 +81,7 @@ If you run into issues during installation:
 
 - :material-wrench: Check our [Troubleshooting Guide](troubleshooting.md)
 - :material-github: Report bugs on [GitHub Issues](https://github.com/pem725/NeuronAutomator/issues)
-- :material-book: Read the [Configuration Guide](../configuration/) for customization options
+- :material-book: Read the [Configuration Guide](../configuration/index.md) for customization options
 
 ---
 

@@ -186,12 +186,12 @@ Ready to dive deeper into specific features?
     
     Customize the automation to match your preferences.
     
-    [:octicons-arrow-right-24: Configuration](../configuration/)
+    [:octicons-arrow-right-24: Configuration](../configuration/index.md)
 
 -   **Installation**
     
     Get started with your preferred installation method.
     
-    [:octicons-arrow-right-24: Installation](../installation/)
+    [:octicons-arrow-right-24: Installation](../installation/index.md)
 
 </div>

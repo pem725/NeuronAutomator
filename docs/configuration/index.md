@@ -284,7 +284,7 @@ neuron-automation --reset-config --section=scheduling
     
     Learn how to use the configured automation system.
     
-    [:octicons-arrow-right-24: Usage Guide](../usage/)
+    [:octicons-arrow-right-24: Usage Guide](../usage/index.md)
 
 -   **Platform Setup**
     
