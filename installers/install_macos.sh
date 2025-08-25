@@ -26,23 +26,42 @@ command_exists() {
 # Check for Homebrew and install if needed
 if ! command_exists brew; then
     echo "🍺 Installing Homebrew..."
+    # Set environment variables for non-interactive installation
+    export NONINTERACTIVE=1
+    export CI=1
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     # Add Homebrew to PATH for current session
     eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || eval "$(/usr/local/bin/brew shellenv)"
+    # Also ensure brew is in PATH for this session
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 fi
 
 # Update Homebrew
 echo "📦 Updating Homebrew..."
-brew update
+if ! brew update; then
+    echo "⚠️ Warning: Homebrew update failed, but continuing..."
+fi
 
 # Install required packages
 echo "📦 Installing system dependencies..."
-brew install python3
+if ! brew install python3; then
+    echo "⚠️ Warning: Python3 installation failed, checking if already installed..."
+    if ! command_exists python3; then
+        echo "❌ Python3 not available and installation failed"
+        exit 1
+    fi
+    echo "✅ Python3 already available"
+fi
 
 # Install Google Chrome if not present
 if ! command_exists google-chrome && ! [ -d "/Applications/Google Chrome.app" ]; then
     echo "🌐 Installing Google Chrome..."
-    brew install --cask google-chrome
+    if ! brew install --cask google-chrome; then
+        echo "⚠️ Warning: Chrome installation failed, but continuing..."
+        echo "   You may need to install Chrome manually from: https://www.google.com/chrome/"
+    else
+        echo "✅ Google Chrome installed successfully"
+    fi
 else
     echo "✅ Google Chrome already installed"
 fi

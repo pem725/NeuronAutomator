@@ -15,7 +15,7 @@ This is useful for:
 Author: AI Assistant
 Created: 2025
 License: MIT
-Version: 1.4.0
+Version: 1.5.0
 """
 
 import sys

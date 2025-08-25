@@ -9,7 +9,7 @@ duplicate reading and provide reading analytics.
 Author: AI Assistant
 Created: 2025
 License: MIT
-Version: 1.4.0
+Version: 1.5.0
 """
 
 import sqlite3
@@ -22,7 +22,7 @@ from typing import List, Dict, Optional, Set, Tuple
 from urllib.parse import urlparse
 import logging
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 
 class LinkManager:

@@ -9,10 +9,10 @@ in separate tabs every weekday morning.
 Author: AI Assistant  
 Created: 2025
 License: MIT
-Version: 1.4.0
+Version: 1.5.0
 """
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 __author__ = "AI Assistant"
 __license__ = "MIT"
 
@@ -119,7 +119,7 @@ def setup_system_integration():
         else:
             # For Linux/macOS, run the shell script
             import subprocess
-            result = subprocess.run([temp_installer], capture_output=True, text=True)
+            result = subprocess.run(["bash", temp_installer], capture_output=True, text=True)
         
         # Clean up temp file
         os.unlink(temp_installer)
@@ -729,19 +729,20 @@ class NeuronNewsletterAutomation:
                 # Add a longer delay to ensure all tabs are fully loaded and detach works
                 time.sleep(5)
                 
-                # Explicitly mark the driver for detachment and set to None to prevent cleanup
                 self.logger.info("🌅 Good morning! Your newsletter articles are ready to read.")
                 self.logger.info(f"📖 {len(successfully_opened_links)} tabs opened in your browser")
                 self.logger.info("⚠️  BROWSER PERSISTENCE: Tabs will remain open until you manually close them")
                 
-                # Critical: Set driver to None to prevent any cleanup
-                driver = None
+                # Browser will remain open due to detach=True option in Chrome setup
+                # Do not quit the driver - let it stay detached
                 
                 return True
                 
             except Exception as e:
                 self.logger.error(f"Attempt {attempt} failed: {e}")
-                if driver:
+                # Only quit driver if we haven't successfully opened any tabs
+                # If tabs were opened, keep browser alive even on error
+                if driver and not successfully_opened_links:
                     try:
                         driver.quit()
                     except:
