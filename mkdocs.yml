@@ -141,6 +141,8 @@ nav:
     - System Management: usage/system-management.md
   - Reference:
     - reference/index.md
+    - CLI Reference: reference/cli-reference.md
+    - Configuration Reference: reference/config-reference.md
   - Contributing:
     - contributing/index.md
 

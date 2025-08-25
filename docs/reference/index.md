@@ -334,7 +334,7 @@ class BlacklistRewind:
     
     Learn how to use all these commands effectively.
     
-    [:octicons-arrow-right-24: Usage Guide](../usage/)
+    [:octicons-arrow-right-24: Usage Guide](../usage/index.md)
 
 -   **Troubleshooting**
     
