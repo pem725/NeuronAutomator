@@ -43,7 +43,7 @@ Found a bug? Please report it:
 ### ✨ Feature Requests
 Have an idea for improvement?
 
-1. **Check the roadmap** in [TODO.md](../TODO.md)
+1. **Check the roadmap** in [TODO.md](../../TODO.md)
 2. **Describe the use case** clearly
 3. **Explain the benefit** to users
 4. **Consider implementation complexity**
@@ -284,7 +284,7 @@ Major contributors who have significantly improved the project:
 
 ## 🎯 Roadmap
 
-Check [TODO.md](../TODO.md) for:
+Check [TODO.md](../../TODO.md) for:
 - **Current priorities**
 - **Future enhancements** 
 - **Community wishes**

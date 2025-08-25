@@ -130,10 +130,13 @@ nav:
   - Features:
     - features/index.md
     - Time Rewind Tool: features/time-rewind.md
+    - Link Management: features/link-management.md
     - Complete Rewind Guide: BLACKLIST_REWIND_USAGE.md
   - Configuration:
     - configuration/index.md  
     - Basic Configuration: configuration/basic-config.md
+    - Platform Setup: configuration/platform-setup.md
+    - Advanced Settings: configuration/advanced-settings.md
   - Usage:
     - usage/index.md
     - Daily Operation: usage/daily-operation.md
