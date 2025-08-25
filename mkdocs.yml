@@ -136,6 +136,9 @@ nav:
     - Basic Configuration: configuration/basic-config.md
   - Usage:
     - usage/index.md
+    - Daily Operation: usage/daily-operation.md
+    - Manual Commands: usage/manual-commands.md
+    - System Management: usage/system-management.md
   - Reference:
     - reference/index.md
   - Contributing:
