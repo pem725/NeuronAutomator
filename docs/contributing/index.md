@@ -43,7 +43,7 @@ Found a bug? Please report it:
 ### ✨ Feature Requests
 Have an idea for improvement?
 
-1. **Check the roadmap** in [TODO.md](../../TODO.md)
+1. **Check the roadmap** in GitHub Issues and Discussions
 2. **Describe the use case** clearly
 3. **Explain the benefit** to users
 4. **Consider implementation complexity**
@@ -284,11 +284,11 @@ Major contributors who have significantly improved the project:
 
 ## 🎯 Roadmap
 
-Check [TODO.md](../../TODO.md) for:
-- **Current priorities**
-- **Future enhancements** 
-- **Community wishes**
-- **Technical debt items**
+Current development priorities include:
+- **Multi-newsletter support** - Support for additional newsletters beyond Neuron Daily
+- **Enhanced analytics** - Advanced reading pattern analysis and recommendations  
+- **Mobile companion app** - Cross-device reading continuation
+- **AI-powered filtering** - Intelligent content categorization and personalization
 
 Popular requested features:
 - Multi-newsletter support
