@@ -71,13 +71,15 @@ class Config:
     # Chrome browser settings
     CHROME_OPTIONS = [
         "--no-sandbox",
-        "--disable-dev-shm-usage", 
+        "--disable-dev-shm-usage",
         "--disable-gpu",
         "--window-size=1920,1080",
         "--start-maximized",
         "--headless",  # Headless mode enabled by default
         "--autoplay-policy=document-user-activation-required",  # Disable video autoplay
         "--disable-features=VizDisplayCompositor",  # Additional autoplay prevention
+        "--mute-audio",  # Mute all audio including videos
+        "--remote-allow-origins=*",  # Allow remote origins for browser persistence
     ]
     
     # Weekday settings (0=Monday, 6=Sunday)

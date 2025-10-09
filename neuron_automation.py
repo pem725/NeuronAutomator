@@ -217,32 +217,34 @@ class NeuronNewsletterAutomation:
     def setup_chrome_driver(self) -> webdriver.Chrome:
         """Setup and return Chrome WebDriver with appropriate options."""
         self.logger.info("Setting up Chrome WebDriver to use regular browser")
-        
+
         chrome_options = Options()
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
-        
-        # Disable video autoplay
+
+        # Disable video autoplay and mute audio
         chrome_options.add_argument("--autoplay-policy=document-user-activation-required")
         chrome_options.add_argument("--disable-features=VizDisplayCompositor")
-        
+        chrome_options.add_argument("--mute-audio")  # Mute all audio including videos
+
         # Browser persistence options
         chrome_options.add_argument("--disable-extensions-except")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--no-first-run")
         chrome_options.add_argument("--disable-default-apps")
-        
+
         # Prevent browser from closing when automation ends
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        
+
         # Additional persistence options
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--allow-running-insecure-content")
-        
+        chrome_options.add_argument("--remote-allow-origins=*")  # Allow remote origins for persistence
+
         # Enable remote debugging for connection attempts
         chrome_options.add_argument("--remote-debugging-port=9222")
         
@@ -267,20 +269,22 @@ class NeuronNewsletterAutomation:
                 chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--window-size=1920,1080")
                 chrome_options.add_argument("--start-maximized")
-                
-                # Disable video autoplay
+
+                # Disable video autoplay and mute audio
                 chrome_options.add_argument("--autoplay-policy=document-user-activation-required")
                 chrome_options.add_argument("--disable-features=VizDisplayCompositor")
-                
+                chrome_options.add_argument("--mute-audio")  # Mute all audio including videos
+
                 # Browser persistence options for fallback
                 chrome_options.add_experimental_option("detach", True)
                 chrome_options.add_experimental_option("useAutomationExtension", False)
                 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
                 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-                
+
                 # Additional persistence options
                 chrome_options.add_argument("--disable-web-security")
                 chrome_options.add_argument("--allow-running-insecure-content")
+                chrome_options.add_argument("--remote-allow-origins=*")  # Allow remote origins for persistence
                 
                 service = Service(ChromeDriverManager().install())
                 driver = webdriver.Chrome(service=service, options=chrome_options)
