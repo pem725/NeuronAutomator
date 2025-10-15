@@ -264,6 +264,13 @@ class NeuronNewsletterAutomation:
                 # Fall back to starting new Chrome instance with regular profile
                 self.logger.info("Starting new Chrome instance with regular profile...")
                 chrome_options = Options()
+                # Use the existing user's Chrome profile
+                if sys.platform == "linux" or sys.platform == "linux2":
+                    from pathlib import Path
+                    user_data_dir = Path.home() / ".config" / "google-chrome"
+                    chrome_options.add_argument(f"user-data-dir={user_data_dir}")
+                    chrome_options.add_argument("profile-directory=Default")
+                
                 chrome_options.add_argument("--no-sandbox")
                 chrome_options.add_argument("--disable-dev-shm-usage")
                 chrome_options.add_argument("--disable-gpu")
