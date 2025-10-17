@@ -8,8 +8,13 @@
 
 **Supported Platforms:** Linux, macOS, Windows
 
+## Project Review
+
+📊 **[Complete Project Review & Analysis](PROJECT_REVIEW.md)** - Comprehensive technical documentation, architecture decisions, development history, and future roadmap.
+
 ## 📋 Table of Contents
 
+- [Project Review](#project-review)
 - [Features](#features)
 - [Quick Start](#quick-start)
   - [Option 1: pip Install (Recommended)](#option-1-pip-install-recommended)

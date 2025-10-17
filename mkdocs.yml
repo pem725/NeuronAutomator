@@ -123,6 +123,7 @@ markdown_extensions:
 # Navigation
 nav:
   - Home: index.md
+  - Project Review: PROJECT_REVIEW.md
   - Installation:
     - installation/index.md
     - Manual Installation: installation/manual-setup.md
