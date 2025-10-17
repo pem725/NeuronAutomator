@@ -216,89 +216,52 @@ class NeuronNewsletterAutomation:
     
     def setup_chrome_driver(self) -> webdriver.Chrome:
         """Setup and return Chrome WebDriver with appropriate options."""
-        self.logger.info("Setting up Chrome WebDriver to use regular browser")
+        self.logger.info("Setting up Chrome WebDriver with dedicated automation profile")
 
         chrome_options = Options()
+
+        # Use dedicated automation profile directory (isolated from user's main profile)
+        chrome_profile_dir = self.config_path / 'chrome_profile'
+        chrome_profile_dir.mkdir(parents=True, exist_ok=True)
+        chrome_options.add_argument(f"user-data-dir={chrome_profile_dir}")
+
+        # Basic Chrome options
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--start-maximized")
 
         # Disable video autoplay and mute audio
         chrome_options.add_argument("--autoplay-policy=document-user-activation-required")
         chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.add_argument("--mute-audio")  # Mute all audio including videos
 
-        # Browser persistence options
+        # Browser persistence options - keep browser open after automation completes
         chrome_options.add_argument("--disable-extensions-except")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--no-first-run")
         chrome_options.add_argument("--disable-default-apps")
 
-        # Prevent browser from closing when automation ends
+        # Critical: Prevent browser from closing when automation ends
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 
-        # Additional persistence options
+        # Additional persistence options for cross-platform compatibility
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--allow-running-insecure-content")
         chrome_options.add_argument("--remote-allow-origins=*")  # Allow remote origins for persistence
 
-        # Enable remote debugging for connection attempts
-        chrome_options.add_argument("--remote-debugging-port=9222")
-        
         try:
-            # First try to connect to an existing Chrome instance
-            try:
-                self.logger.info("Attempting to connect to existing Chrome instance...")
-                chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
-                service = Service(ChromeDriverManager().install())
-                driver = webdriver.Chrome(service=service, options=chrome_options)
-                driver.set_page_load_timeout(self.page_load_timeout)
-                self.logger.info("Connected to existing Chrome instance")
-                return driver
-            except Exception as e:
-                self.logger.info(f"No existing Chrome instance found: {e}")
-                
-                # Fall back to starting new Chrome instance with regular profile
-                self.logger.info("Starting new Chrome instance with regular profile...")
-                chrome_options = Options()
-                # Use the existing user's Chrome profile
-                if sys.platform == "linux" or sys.platform == "linux2":
-                    from pathlib import Path
-                    user_data_dir = Path.home() / ".config" / "google-chrome"
-                    chrome_options.add_argument(f"user-data-dir={user_data_dir}")
-                    chrome_options.add_argument("profile-directory=Default")
-                
-                chrome_options.add_argument("--no-sandbox")
-                chrome_options.add_argument("--disable-dev-shm-usage")
-                chrome_options.add_argument("--disable-gpu")
-                chrome_options.add_argument("--window-size=1920,1080")
-                chrome_options.add_argument("--start-maximized")
+            self.logger.info(f"Starting Chrome with profile: {chrome_profile_dir}")
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver.set_page_load_timeout(self.page_load_timeout)
+            self.logger.info("Chrome instance created successfully with dedicated automation profile")
+            return driver
 
-                # Disable video autoplay and mute audio
-                chrome_options.add_argument("--autoplay-policy=document-user-activation-required")
-                chrome_options.add_argument("--disable-features=VizDisplayCompositor")
-                chrome_options.add_argument("--mute-audio")  # Mute all audio including videos
-
-                # Browser persistence options for fallback
-                chrome_options.add_experimental_option("detach", True)
-                chrome_options.add_experimental_option("useAutomationExtension", False)
-                chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
-                chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-
-                # Additional persistence options
-                chrome_options.add_argument("--disable-web-security")
-                chrome_options.add_argument("--allow-running-insecure-content")
-                chrome_options.add_argument("--remote-allow-origins=*")  # Allow remote origins for persistence
-                
-                service = Service(ChromeDriverManager().install())
-                driver = webdriver.Chrome(service=service, options=chrome_options)
-                driver.set_page_load_timeout(self.page_load_timeout)
-                self.logger.info("New Chrome instance created with regular profile")
-                return driver
-                
         except Exception as e:
             self.logger.error(f"Failed to setup Chrome WebDriver: {e}")
             raise
