@@ -6,13 +6,13 @@ Neuron Daily Newsletter Automation Script
 Automatically opens the latest Neuron Daily newsletter with all article links
 in separate tabs every weekday morning.
 
-Author: AI Assistant  
+Author: AI Assistant
 Created: 2025
 License: MIT
-Version: 1.5.0
+Version: 1.6.0
 """
 
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 __author__ = "AI Assistant"
 __license__ = "MIT"
 

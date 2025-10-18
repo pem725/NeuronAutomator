@@ -552,6 +552,30 @@ See [TODO.md](TODO.md) for:
 
 ## Changelog
 
+### Version 1.6.0 (October 2025)
+- **Fixed**: Browser persistence and tab population on Linux
+  - Resolved "user data directory in use" errors
+  - Removed conflicting Linux-specific profile code
+  - Simplified to dedicated automation profile for all platforms
+- **Added**: PROJECT_REVIEW.md comprehensive project documentation
+  - Architecture decisions and technical documentation
+  - Development history and evolution
+  - Future roadmap and planned enhancements
+- **Improved**: Documentation website integration
+  - Added prominent Netlify website links (https://neuronautomator.netlify.app/)
+  - Updated README with documentation and GitHub links
+  - Enhanced docs homepage with Quick Links section
+- **Fixed**: Cross-platform browser behavior consistency
+  - Unified Chrome setup for Linux and macOS
+  - Browser stays open reliably after automation completes
+  - Successfully tested with 43 newsletter tabs
+
+### Version 1.5.0
+- Enhanced browser persistence options
+- Cross-platform improvements
+- Link management system
+- Blacklist time rewind functionality
+
 ### Version 1.0.0
 - Initial release
 - Automated weekday newsletter opening
