@@ -1,5 +1,8 @@
 # Neuron Daily Newsletter Automation
 
+!!! info "Quick Links"
+    📚 **[Complete Documentation](https://neuronautomator.netlify.app/)** • 💻 **[GitHub Repository](https://github.com/pem725/NeuronAutomator)** • 📊 **[Project Review](PROJECT_REVIEW.md)**
+
 <div class="grid cards" markdown>
 
 -   :material-clock-fast:{ .lg .middle } **Smart Automation**

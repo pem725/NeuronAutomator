@@ -1,7 +1,7 @@
 site_name: Neuron Daily Newsletter Automation
 site_description: Cross-platform automation system for the Neuron Daily newsletter
 site_author: AI Assistant
-site_url: https://neuron-automator.netlify.app
+site_url: https://neuronautomator.netlify.app
 
 # Repository
 repo_name: pem725/NeuronAutomator

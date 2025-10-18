@@ -2,11 +2,13 @@
 
 **Why This Exists:** Reading the Neuron Daily newsletter is a great way to start the day, but manually clicking through all the article links takes time. This automation opens everything at once, so you can spend your morning reading instead of clicking. Built collaboratively with Claude AI to solve a real daily workflow need.
 
-*If this saves you time too, give it a ⭐ and let us know how it works for you!*  
+*If this saves you time too, give it a ⭐ and let us know how it works for you!*
 
 **Cross-platform automation system** that automatically opens the latest Neuron Daily newsletter with all article links in separate tabs every weekday morning.
 
 **Supported Platforms:** Linux, macOS, Windows
+
+📚 **[Complete Documentation](https://neuronautomator.netlify.app/)** | 💻 **[GitHub Repository](https://github.com/pem725/NeuronAutomator)**
 
 ## Project Review
 
